@@ -185,3 +185,46 @@ def test_ratings_basic(qtbot):
 
     w.currentPage().spin_boxes['orange'][1].setValue(7)
     assert w.matrix.df.loc[:, 'Percentage'][2] == 59.09090909090909
+
+
+def test_welcome_page_advanced(qtbot):
+    w = wizard.Wizard()
+    qtbot.addWidget(w)
+    w.show()
+
+    advanced_radio = w.currentPage().layout().itemAt(1).widget()
+    advanced_radio.setChecked(True)  # mouse click doesn't work
+    assert advanced_radio.isChecked() is True
+    assert w.field('basic') is False
+
+
+def test_continuous_criteria_none(qtbot):
+    w = wizard.Wizard()
+    w.page(wizard.Page.Weights).collection = lambda: ['size', 'taste']
+    w.matrix = Matrix()
+    qtbot.addWidget(w)
+    w.show()
+
+    # Setup
+    advanced_radio = w.currentPage().layout().itemAt(1).widget()
+    advanced_radio.setChecked(True)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    qtbot.keyClicks(w.currentPage().line_edit, 'apple')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.keyClicks(w.currentPage().line_edit, 'orange')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    qtbot.keyClicks(w.currentPage().line_edit, 'size')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.keyClicks(w.currentPage().line_edit, 'taste')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    w.currentPage().spin_boxes[0].setValue(4)
+    w.currentPage().spin_boxes[1].setValue(7)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+
+    # Test pages
+    assert type(w.currentPage()) == wizard.ContinuousCriteriaPage
+    # Accept default, which is no continuous criteria
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    assert type(w.currentPage()) == wizard.RatingPage
