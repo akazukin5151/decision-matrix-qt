@@ -228,3 +228,66 @@ def test_continuous_criteria_none(qtbot):
     # Accept default, which is no continuous criteria
     qtbot.mouseClick(w.next_button, Qt.LeftButton)
     assert type(w.currentPage()) == wizard.RatingPage
+
+
+def test_continuous_criteria(qtbot):
+    w = wizard.Wizard()
+    w.page(wizard.Page.Weights).collection = lambda: ['size', 'taste']
+    w.matrix = Matrix()
+    qtbot.addWidget(w)
+    w.show()
+
+    # Setup
+    advanced_radio = w.currentPage().layout().itemAt(1).widget()
+    advanced_radio.setChecked(True)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    qtbot.keyClicks(w.currentPage().line_edit, 'apple')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.keyClicks(w.currentPage().line_edit, 'orange')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    qtbot.keyClicks(w.currentPage().line_edit, 'size')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.keyClicks(w.currentPage().line_edit, 'taste')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    w.currentPage().spin_boxes[0].setValue(4)
+    w.currentPage().spin_boxes[1].setValue(7)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+
+    # Test pages
+    assert type(w.currentPage()) == wizard.ContinuousCriteriaPage
+
+    assert w.field('yes') is False
+    assert w.currentPage().line_edit.isEnabled() is False
+    assert w.currentPage().list_widget.isEnabled() is False
+    assert w.currentPage().add_button.isEnabled() is False
+    qtbot.mouseClick(w.currentPage().yes, Qt.LeftButton)
+    assert w.field('yes') is True
+    assert w.currentPage().line_edit.isEnabled() is True
+    assert w.currentPage().list_widget.isEnabled() is True
+    assert w.currentPage().add_button.isEnabled() is True
+
+    # Kind of duplicated from abstract_multi_input_page_tester()
+    qtbot.keyClicks(w.currentPage().line_edit, 'price')
+    assert w.currentPage().line_edit.text() == 'price'
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    assert w.currentPage().line_edit.text() == ''
+    assert w.currentPage().list_widget.item(0).text() == 'price'
+
+    qtbot.keyClicks(w.currentPage().line_edit, 'size')
+    qtbot.mouseClick(w.currentPage().add_button, Qt.LeftButton)
+    assert w.currentPage().line_edit.text() == ''
+    assert w.currentPage().list_widget.item(1).text() == 'size'
+    assert w.currentPage().list_widget.count() == 2
+
+    assert 'price' in w.matrix.df.columns
+    assert 'size' in w.matrix.df.columns
+
+    w.currentPage().list_widget.setCurrentRow(1)
+    qtbot.mouseClick(w.currentPage().delete_button, Qt.LeftButton)
+    assert w.currentPage().list_widget.count() == 1
+    assert w.currentPage().list_widget.item(0).text() == 'price'
+
+    assert 'price' in w.matrix.df.columns
+    assert 'size' not in w.matrix.df.columns
