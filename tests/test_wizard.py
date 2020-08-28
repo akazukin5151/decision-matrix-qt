@@ -50,6 +50,7 @@ def test_choices_wizard_page(qtbot):
 
     # Test page
     abstract_multi_input_page_tester(qtbot, w, 'apple', 'orange', 'index')
+    assert w.next_button.isEnabled() is True
 
 
 def test_criteria_wizard_page(qtbot):
@@ -67,6 +68,7 @@ def test_criteria_wizard_page(qtbot):
 
     # Test page
     abstract_multi_input_page_tester(qtbot, w, 'taste', 'size', 'columns')
+    assert w.next_button.isEnabled() is True
 
 
 def abstract_slider_page_tester(qtbot, w):
@@ -118,6 +120,8 @@ def test_weights_wizard_page_basic(qtbot):
     # Test page
     abstract_slider_page_tester(qtbot, w)
     assert w.matrix.df.loc['Weight'][:-1][0] == 4
+
+    assert w.next_button.isEnabled() is True
 
 
 def test_ratings_basic(qtbot):
@@ -189,6 +193,8 @@ def test_ratings_basic(qtbot):
     w.currentPage().spin_boxes['orange'][1].setValue(7)
     assert w.matrix.df.loc[:, 'Percentage'][2] == 59.09090909090909
 
+    assert w.next_button.isEnabled() is True
+
 
 def test_welcome_page_advanced(qtbot):
     w = wizard.Wizard()
@@ -199,6 +205,8 @@ def test_welcome_page_advanced(qtbot):
     advanced_radio.setChecked(True)  # mouse click doesn't work
     assert advanced_radio.isChecked() is True
     assert w.field('basic') is False
+
+    assert w.next_button.isEnabled() is True
 
 
 def test_continuous_criteria_none(qtbot):
@@ -225,9 +233,10 @@ def test_continuous_criteria_none(qtbot):
     w.currentPage().spin_boxes[0].setValue(4)
     w.currentPage().spin_boxes[1].setValue(7)
     qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    assert type(w.currentPage()) == wizard.ContinuousCriteriaPage
 
     # Test pages
-    assert type(w.currentPage()) == wizard.ContinuousCriteriaPage
+    assert w.next_button.isEnabled() is True
     # Accept default, which is no continuous criteria
     qtbot.mouseClick(w.next_button, Qt.LeftButton)
     assert type(w.currentPage()) == wizard.RatingPage
@@ -257,10 +266,9 @@ def test_continuous_criteria(qtbot):
     w.currentPage().spin_boxes[0].setValue(4)
     w.currentPage().spin_boxes[1].setValue(7)
     qtbot.mouseClick(w.next_button, Qt.LeftButton)
-
-    # Test pages
     assert type(w.currentPage()) == wizard.ContinuousCriteriaPage
 
+    # Test pages
     assert w.field('yes') is False
     assert w.currentPage().line_edit.isEnabled() is False
     assert w.currentPage().list_widget.isEnabled() is False
@@ -295,6 +303,8 @@ def test_continuous_criteria(qtbot):
     assert 'price' in w.matrix.df.columns
     assert 'size' not in w.matrix.df.columns
 
+    assert w.next_button.isEnabled() is True
+
 
 def test_continuous_criteria_weights(qtbot):
     w = wizard.Wizard()
@@ -326,11 +336,13 @@ def test_continuous_criteria_weights(qtbot):
     qtbot.keyClicks(w.currentPage().line_edit, 'size')
     qtbot.mouseClick(w.currentPage().add_button, Qt.LeftButton)
     qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    assert type(w.currentPage()) == wizard.ContinuousCriteriaWeightsPage
 
     # Test pages
-    assert type(w.currentPage()) == wizard.ContinuousCriteriaWeightsPage
     abstract_slider_page_tester(qtbot, w)
     assert w.matrix.df.loc['Weight', 'price'] == 4
+
+    assert w.next_button.isEnabled() is True
 
 
 def test_data_wizard_page(qtbot):
