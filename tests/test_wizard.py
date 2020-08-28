@@ -24,7 +24,7 @@ def new_subscriptable_mock():
     return SubscriptableMock()
 
 
-def abstract_multi_input_page_tester(qtbot, w, text1, text2):
+def abstract_multi_input_page_tester(qtbot, w, text1, text2, side):
     qtbot.keyClicks(w.currentPage().line_edit, text1)
     assert w.currentPage().line_edit.text() == text1
 
@@ -38,16 +38,25 @@ def abstract_multi_input_page_tester(qtbot, w, text1, text2):
     assert w.currentPage().list.item(1).text() == text2
     assert w.currentPage().list.count() == 2
 
+    if side == 'index':
+        assert (w.matrix.df.index[1:] == [text1, text2]).all()
+    else:
+        assert (w.matrix.df.columns == [text1, text2]).all()
+
     w.currentPage().list.setCurrentRow(1)
     qtbot.mouseClick(w.currentPage().delete_button, Qt.LeftButton)
     assert w.currentPage().list.count() == 1
     assert w.currentPage().list.item(0).text() == text1
 
+    if side == 'index':
+        assert (w.matrix.df.index[1:] == [text1]).all()
+    else:
+        assert (w.matrix.df.columns == [text1]).all()
+
 
 def test_choices_wizard_page(qtbot):
     w = wizard.Wizard()
-    matrix = new_subscriptable_mock()
-    w.matrix = matrix
+    w.matrix = Matrix()
     qtbot.addWidget(w)
     w.show()
 
@@ -56,23 +65,12 @@ def test_choices_wizard_page(qtbot):
     assert type(w.currentPage()) == wizard.ChoicesPage
 
     # Test page
-    abstract_multi_input_page_tester(qtbot, w, 'apple', 'orange')
-
-    assert len(w.matrix.method_calls) == 3
-    assert w.matrix.method_calls[:-1] == [
-        call.add_choices('apple'),
-        call.add_choices('orange'),
-        #call.df.drop(<SubscriptableMock>, inplace=True),
-    ]
-    assert w.matrix.method_calls[-1][0] == 'df.drop'
-    # The first argument is a <SubscriptableMock> here
-    assert w.matrix.method_calls[-1][2] == {'inplace': True}
+    abstract_multi_input_page_tester(qtbot, w, 'apple', 'orange', 'index')
 
 
 def test_criteria_wizard_page(qtbot):
     w = wizard.Wizard()
-    matrix = new_subscriptable_mock()
-    w.matrix = matrix
+    w.matrix = Matrix()
     qtbot.addWidget(w)
     w.show()
 
@@ -84,19 +82,7 @@ def test_criteria_wizard_page(qtbot):
     assert type(w.currentPage()) == wizard.CriteriaPage
 
     # Test page
-    abstract_multi_input_page_tester(qtbot, w, 'taste', 'size')
-
-    assert len(w.matrix.method_calls) == 4
-    assert w.matrix.method_calls[:-1] == [
-        call.add_choices('apple'),
-
-        call.add_criterion('taste', weight=np.nan),
-        call.add_criterion('size', weight=np.nan),
-        #call.df.drop(None, axis='columns', inplace=True),
-    ]
-    assert w.matrix.method_calls[-1][0] == 'df.drop'
-    # The first argument is a <SubscriptableMock> here
-    assert w.matrix.method_calls[-1][2] == {'axis': 'columns', 'inplace': True}
+    abstract_multi_input_page_tester(qtbot, w, 'taste', 'size', 'columns')
 
 
 def test_weights_wizard_page_basic(qtbot):
