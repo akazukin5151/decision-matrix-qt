@@ -4,9 +4,16 @@ from unittest.mock import Mock, call
 from gui import wizard
 
 
+class SubscriptableMock(Mock):
+    subscripts = []
+
+    def __getitem__(self, other):
+        self.subscripts.append(other)
+
+
 def test_choices_wizard_page(qtbot):
     w = wizard.Wizard()
-    matrix = Mock()
+    matrix = SubscriptableMock()
     w.matrix = matrix
     qtbot.addWidget(w)
     w.show()
@@ -33,3 +40,17 @@ def test_choices_wizard_page(qtbot):
         call.add_choices('apple'),
         call.add_choices('orange')
     ]
+
+    w.currentPage().list.setCurrentRow(1)
+    qtbot.mouseClick(w.currentPage().delete_button, Qt.LeftButton)
+    assert w.currentPage().list.count() == 1
+    assert w.currentPage().list.item(0).text() == 'apple'
+
+    assert w.matrix.subscripts == [2]
+    assert len(w.matrix.method_calls) == 3
+    # 'None' is because subscript mock returned None
+    assert w.matrix.method_calls[-1] == call.df.drop(None, inplace=True)
+
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    assert type(w.currentPage()) == wizard.CriteriaPage
+
