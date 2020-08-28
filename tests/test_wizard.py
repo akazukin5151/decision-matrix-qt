@@ -8,22 +8,6 @@ from matrix import Matrix
 from gui import wizard
 
 
-def new_subscriptable_mock():
-    class SubscriptableMock(Mock):
-        subscripts = []
-        set_items = {}
-
-        def __getitem__(self, other):
-            self.subscripts.append(other)
-            return self
-
-        def __setitem__(self, item, value):
-            self.set_items[item] = value
-            return self
-
-    return SubscriptableMock()
-
-
 def abstract_multi_input_page_tester(qtbot, w, text1, text2, side):
     qtbot.keyClicks(w.currentPage().line_edit, text1)
     assert w.currentPage().line_edit.text() == text1
@@ -88,8 +72,7 @@ def test_criteria_wizard_page(qtbot):
 def test_weights_wizard_page_basic(qtbot):
     w = wizard.Wizard()
     w.page(wizard.Page.Weights).collection = lambda: ['size', 'taste']
-    matrix = new_subscriptable_mock()
-    w.matrix = matrix
+    w.matrix = Matrix()
     qtbot.addWidget(w)
     w.show()
 
@@ -111,17 +94,27 @@ def test_weights_wizard_page_basic(qtbot):
 
     # Spin boxes and sliders have synchronized values
     w.currentPage().spin_boxes[0].setValue(3)
-    assert w.currentPage().spin_boxes[0].value() == w.currentPage().sliders[0].value() == 3
-    w.currentPage().spin_boxes[1].setValue(7)
-    assert w.currentPage().spin_boxes[1].value() == w.currentPage().sliders[1].value() == 7
+    assert (
+        w.currentPage().spin_boxes[0].value()
+        == w.currentPage().sliders[0].value()
+        == 3
+    )
+    w.currentPage().sliders[1].setValue(7)
+    assert (
+        w.currentPage().spin_boxes[1].value()
+        == w.currentPage().sliders[1].value()
+        == 7
+    )
 
     # Using up-arrow key to change value
     qtbot.mouseClick(w.currentPage().spin_boxes[0], Qt.LeftButton)
     qtbot.keyClick(w.currentPage().spin_boxes[0], Qt.Key_Up)
-    assert w.currentPage().spin_boxes[0].value() == w.currentPage().sliders[0].value() == 4
-
-    assert matrix.subscripts == ['Weight'] * 3
-    assert matrix.set_items == {0: 4, 1: 7}
+    assert (
+        w.currentPage().spin_boxes[0].value()
+        == w.currentPage().sliders[0].value()
+        == w.matrix.df.loc['Weight'][:-1][0] == 4
+        == 4
+    )
 
 
 def test_ratings_basic(qtbot):
