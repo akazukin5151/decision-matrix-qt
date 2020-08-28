@@ -430,7 +430,6 @@ class RatingPage(EnableNextOnBackMixin, QWizardPage):
     def value_changed(self, choice, criterion, value):
         self.parent.matrix.rate_choices({choice: {criterion: value}})
         self.parent.next_button.setEnabled(True)
-        print(self.parent.matrix)
 
 
 class DataPage(EnableNextOnBackMixin, QWizardPage):
@@ -520,7 +519,6 @@ class DataPage(EnableNextOnBackMixin, QWizardPage):
             self.parent.matrix.value_score_df.loc[index, criterion] = value
             self.parent.matrix.value_score_df.loc[index, criterion + '_score'] = score
 
-        print(self.parent.matrix.value_score_df)
 
     def add_row(self, criterion, deleteable=True):
         # The last row for this criterion
@@ -567,7 +565,6 @@ class DataPage(EnableNextOnBackMixin, QWizardPage):
     def delete(self, criterion, idx):
         pair = [criterion, criterion + '_score']
         self.parent.matrix.value_score_df.loc[idx, pair] = np.nan
-        print(self.parent.matrix.value_score_df)
         self.rows_for_each_criteria[criterion] -= 1
 
         # Last item is the add button; get second last item
