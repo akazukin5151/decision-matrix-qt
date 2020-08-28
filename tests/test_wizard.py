@@ -331,3 +331,101 @@ def test_continuous_criteria_weights(qtbot):
     assert type(w.currentPage()) == wizard.ContinuousCriteriaWeightsPage
     abstract_slider_page_tester(qtbot, w)
     assert w.matrix.df.loc['Weight', 'price'] == 4
+
+
+def test_data_wizard_page(qtbot):
+    w = wizard.Wizard()
+    w.page(wizard.Page.Weights).collection = lambda: ['size', 'taste']
+    w.matrix = Matrix()
+    qtbot.addWidget(w)
+    w.show()
+
+    # Setup
+    advanced_radio = w.currentPage().layout().itemAt(1).widget()
+    advanced_radio.setChecked(True)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    qtbot.keyClicks(w.currentPage().line_edit, 'apple')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.keyClicks(w.currentPage().line_edit, 'orange')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    qtbot.keyClicks(w.currentPage().line_edit, 'size')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.keyClicks(w.currentPage().line_edit, 'taste')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    w.currentPage().spin_boxes[0].setValue(4)
+    w.currentPage().spin_boxes[1].setValue(7)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    qtbot.mouseClick(w.currentPage().yes, Qt.LeftButton)
+    qtbot.keyClicks(w.currentPage().line_edit, 'price')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.keyClicks(w.currentPage().line_edit, 'size')
+    qtbot.mouseClick(w.currentPage().add_button, Qt.LeftButton)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    w.currentPage().spin_boxes[0].setValue(4)
+    w.currentPage().spin_boxes[1].setValue(7)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    assert type(w.currentPage()) == wizard.DataPage
+
+    # Test pages
+    number_of_criteria = 2
+    assert len(w.currentPage().value_spin_boxes.keys()) == number_of_criteria
+    assert len(w.currentPage().score_spin_boxes.keys()) == number_of_criteria
+    assert len(w.currentPage().vertical_layouts.keys()) == number_of_criteria
+
+    number_of_choices = 2
+    for spin_boxes in w.currentPage().value_spin_boxes.values():
+        assert len(spin_boxes) == number_of_choices
+
+    for spin_boxes in w.currentPage().score_spin_boxes.values():
+        assert len(spin_boxes) == number_of_choices
+
+    for vertical_layout in w.currentPage().vertical_layouts.values():
+        # number_of_choices * form_layouts + one 'add pair' button
+        assert vertical_layout.count() == number_of_choices + 1
+
+        for i in range(vertical_layout.count() - 1):
+            form_layout = vertical_layout.itemAt(i)
+            # Each form has a label and an inner grid
+            assert form_layout.count() == 2
+
+            inner_grid = form_layout.itemAt(1)
+            # Each inner grid has two spin boxes, a label, and a delete button
+            assert inner_grid.count() == 4
+
+
+    # 0: First row
+    w.currentPage().value_spin_boxes['price'][0].setValue(1)
+    assert 'price' not in w.matrix.value_score_df.columns
+    w.currentPage().score_spin_boxes['price'][0].setValue(10)
+    assert 'price' in w.matrix.value_score_df.columns
+    assert w.matrix.value_score_df.loc[0, 'price'] == 1
+    assert w.matrix.value_score_df.loc[0, 'price_score'] == 10
+
+    w.currentPage().value_spin_boxes['price'][1].setValue(5)
+    qtbot.mouseClick(w.currentPage().score_spin_boxes['price'][1], Qt.LeftButton)
+    qtbot.keyClick(w.currentPage().score_spin_boxes['price'][1], Qt.Key_Up)
+
+    assert w.matrix.value_score_df.loc[1, 'price'] == 5
+    assert w.matrix.value_score_df.loc[1, 'price_score'] == 1
+
+    # Changing values and scores of a row doesn't affect other rows
+    assert w.matrix.value_score_df.loc[0, 'price'] == 1
+    assert w.matrix.value_score_df.loc[0, 'price_score'] == 10
+
+    w.currentPage().value_spin_boxes['size'][0].setValue(7)
+    w.currentPage().score_spin_boxes['size'][0].setValue(1)
+    assert w.matrix.value_score_df.loc[0, 'size'] == 7
+    assert w.matrix.value_score_df.loc[0, 'size_score'] == 1
+
+    w.currentPage().value_spin_boxes['size'][1].setValue(6)
+    w.currentPage().score_spin_boxes['size'][1].setValue(5)
+    assert w.matrix.value_score_df.loc[1, 'size'] == 6
+    assert w.matrix.value_score_df.loc[1, 'size_score'] == 5
+
+    # Changing values and scores of a criterion doesn't affect other criteria
+    assert w.matrix.value_score_df.loc[0, 'price'] == 1
+    assert w.matrix.value_score_df.loc[0, 'price_score'] == 10
+
+    assert w.next_button.isEnabled() is True
