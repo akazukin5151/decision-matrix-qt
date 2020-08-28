@@ -3,21 +3,22 @@ import numpy as np
 from PySide2.QtCore import Qt
 from unittest.mock import Mock, call
 
+from matrix import Matrix
+
 from gui import wizard
 
 
 def new_subscriptable_mock():
     class SubscriptableMock(Mock):
         subscripts = []
-        set_items = []
+        set_items = {}
 
         def __getitem__(self, other):
             self.subscripts.append(other)
             return self
 
         def __setitem__(self, item, value):
-            self.subscripts.append(item)
-            self.set_items.append(value)
+            self.set_items[item] = value
             return self
 
     return SubscriptableMock()
@@ -132,3 +133,76 @@ def test_weights_wizard_page_basic(qtbot):
     qtbot.mouseClick(w.currentPage().spin_boxes[0], Qt.LeftButton)
     qtbot.keyClick(w.currentPage().spin_boxes[0], Qt.Key_Up)
     assert w.currentPage().spin_boxes[0].value() == w.currentPage().sliders[0].value() == 4
+
+    assert matrix.subscripts == ['Weight'] * 3
+    assert matrix.set_items == {0: 4, 1: 7}
+
+
+def test_ratings_basic(qtbot):
+    w = wizard.Wizard()
+    w.page(wizard.Page.Weights).collection = lambda: ['size', 'taste']
+    w.matrix = Matrix()
+    qtbot.addWidget(w)
+    w.show()
+
+    # Setup
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    qtbot.keyClicks(w.currentPage().line_edit, 'apple')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.keyClicks(w.currentPage().line_edit, 'orange')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    qtbot.keyClicks(w.currentPage().line_edit, 'size')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.keyClicks(w.currentPage().line_edit, 'taste')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    w.currentPage().spin_boxes[0].setValue(4)
+    w.currentPage().spin_boxes[1].setValue(7)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    assert type(w.currentPage()) == wizard.RatingPage
+
+    # Test page
+    number_of_choices = 2
+    assert len(w.currentPage().sliders.keys()) == number_of_choices
+    assert len(w.currentPage().spin_boxes.keys()) == number_of_choices
+
+    number_of_criteria = 2
+    for choice in ('apple', 'orange'):
+        assert len(w.currentPage().sliders[choice]) == number_of_criteria
+        assert len(w.currentPage().spin_boxes[choice]) == number_of_criteria
+
+    for choice in ('apple', 'orange'):
+        for row in (0, 1):
+            w.currentPage().spin_boxes[choice][row].setValue(5)
+            # Spin boxes and sliders have synchronized values
+            assert (
+                w.currentPage().spin_boxes[choice][row].value()
+                == w.currentPage().sliders[choice][row].value()
+                == 5
+            )
+
+            # Using up-arrow key to change value
+            qtbot.mouseClick(w.currentPage().spin_boxes[choice][row], Qt.LeftButton)
+            qtbot.keyClick(w.currentPage().spin_boxes[choice][row], Qt.Key_Up)
+            assert (
+                w.currentPage().spin_boxes[choice][row].value()
+                == w.currentPage().sliders[choice][row].value()
+                == 6
+            )
+
+    # First value is empty
+    assert (w.matrix.df.loc['Weight'][:-1] == [4, 7]).all()
+    assert (w.matrix.df.loc[:, 'Percentage'][1:] == [60, 60]).all()
+
+    w.currentPage().spin_boxes['apple'][0].setValue(3)
+    assert w.matrix.df.loc[:, 'Percentage'][1] == 49.09090909090909
+
+    w.currentPage().spin_boxes['apple'][1].setValue(7)
+    assert w.matrix.df.loc[:, 'Percentage'][1] == 55.45454545454545
+
+    w.currentPage().spin_boxes['orange'][0].setValue(4)
+    assert w.matrix.df.loc[:, 'Percentage'][2] == 52.72727272727272
+
+    w.currentPage().spin_boxes['orange'][1].setValue(7)
+    assert w.matrix.df.loc[:, 'Percentage'][2] == 59.09090909090909
