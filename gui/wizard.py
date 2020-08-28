@@ -1,5 +1,4 @@
 import weakref
-from copy import copy
 from functools import partial
 from enum import IntEnum, auto
 
@@ -24,6 +23,8 @@ from PySide2.QtWidgets import (
     QHBoxLayout,
     QSizePolicy,
 )
+
+from matrix import Matrix
 
 
 class Page(IntEnum):
@@ -617,7 +618,6 @@ class ConclusionPage(QWizardPage):
 
 class WizardMixin:
     def init_wizard(self):
-        self.original_matrix = copy(self.matrix)
         self.wizard = Wizard(self.main_window)
         self.wizard.matrix = weakref.proxy(self.matrix)
         self.wizard.finished.connect(self.get_data)
@@ -629,5 +629,5 @@ class WizardMixin:
         print(self.matrix)
 
     def rejected(self):
-        self.matrix = self.original_matrix
+        self.matrix = Matrix()
         print(self.matrix)
