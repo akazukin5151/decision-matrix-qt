@@ -69,26 +69,7 @@ def test_criteria_wizard_page(qtbot):
     abstract_multi_input_page_tester(qtbot, w, 'taste', 'size', 'columns')
 
 
-def test_weights_wizard_page_basic(qtbot):
-    w = wizard.Wizard()
-    w.page(wizard.Page.Weights).collection = lambda: ['size', 'taste']
-    w.matrix = Matrix()
-    qtbot.addWidget(w)
-    w.show()
-
-    # Setup
-    qtbot.mouseClick(w.next_button, Qt.LeftButton)
-    qtbot.keyClicks(w.currentPage().line_edit, 'apple')
-    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
-    qtbot.mouseClick(w.next_button, Qt.LeftButton)
-    qtbot.keyClicks(w.currentPage().line_edit, 'size')
-    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
-    qtbot.keyClicks(w.currentPage().line_edit, 'taste')
-    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
-    qtbot.mouseClick(w.next_button, Qt.LeftButton)
-    assert type(w.currentPage()) == wizard.WeightsPage
-
-    # Test page
+def abstract_slider_page_tester(qtbot, w):
     assert len(w.currentPage().sliders) == 2
     assert len(w.currentPage().spin_boxes) == 2
 
@@ -112,9 +93,31 @@ def test_weights_wizard_page_basic(qtbot):
     assert (
         w.currentPage().spin_boxes[0].value()
         == w.currentPage().sliders[0].value()
-        == w.matrix.df.loc['Weight'][:-1][0] == 4
         == 4
     )
+
+def test_weights_wizard_page_basic(qtbot):
+    w = wizard.Wizard()
+    w.page(wizard.Page.Weights).collection = lambda: ['size', 'taste']
+    w.matrix = Matrix()
+    qtbot.addWidget(w)
+    w.show()
+
+    # Setup
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    qtbot.keyClicks(w.currentPage().line_edit, 'apple')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    qtbot.keyClicks(w.currentPage().line_edit, 'size')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.keyClicks(w.currentPage().line_edit, 'taste')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    assert type(w.currentPage()) == wizard.WeightsPage
+
+    # Test page
+    abstract_slider_page_tester(qtbot, w)
+    assert w.matrix.df.loc['Weight'][:-1][0] == 4
 
 
 def test_ratings_basic(qtbot):
@@ -291,3 +294,40 @@ def test_continuous_criteria(qtbot):
 
     assert 'price' in w.matrix.df.columns
     assert 'size' not in w.matrix.df.columns
+
+
+def test_continuous_criteria_weights(qtbot):
+    w = wizard.Wizard()
+    w.page(wizard.Page.Weights).collection = lambda: ['size', 'taste']
+    w.matrix = Matrix()
+    qtbot.addWidget(w)
+    w.show()
+
+    # Setup
+    advanced_radio = w.currentPage().layout().itemAt(1).widget()
+    advanced_radio.setChecked(True)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    qtbot.keyClicks(w.currentPage().line_edit, 'apple')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.keyClicks(w.currentPage().line_edit, 'orange')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    qtbot.keyClicks(w.currentPage().line_edit, 'size')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.keyClicks(w.currentPage().line_edit, 'taste')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    w.currentPage().spin_boxes[0].setValue(4)
+    w.currentPage().spin_boxes[1].setValue(7)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+    qtbot.mouseClick(w.currentPage().yes, Qt.LeftButton)
+    qtbot.keyClicks(w.currentPage().line_edit, 'price')
+    qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
+    qtbot.keyClicks(w.currentPage().line_edit, 'size')
+    qtbot.mouseClick(w.currentPage().add_button, Qt.LeftButton)
+    qtbot.mouseClick(w.next_button, Qt.LeftButton)
+
+    # Test pages
+    assert type(w.currentPage()) == wizard.ContinuousCriteriaWeightsPage
+    abstract_slider_page_tester(qtbot, w)
+    assert w.matrix.df.loc['Weight', 'price'] == 4
