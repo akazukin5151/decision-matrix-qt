@@ -83,39 +83,39 @@ class SetupUIMixin(WizardMixin):
     def add_menubar(self, MainWindow):
         all_menus: 'dict[str, dict[str, dict[str, Union[func, QKeySequence, QAction]]]]'
         all_menus = {
-            'File': {
-                'Open': {
+            '&File': {
+                '&Open': {
                     'shortcut': QKeySequence.Open,
                     'signal': lambda: print('todo'),
                 },
-                'Save': {
+                '&Save': {
                     'shortcut': QKeySequence.Save,
                     'signal': lambda: print('todo'),
                 },
-                'Save as': {
+                'Save &as': {
                     'shortcut': QKeySequence.SaveAs,
                     'signal': lambda: print('todo'),
                 },
-                'Quit': {
+                '&Quit': {
                     'shortcut': QKeySequence.Quit,
                     'role': QAction.QuitRole,
                     'signal': QCoreApplication.quit,
                 },
             },
-            'Matrix': {
-                'Assistant': {
+            '&Matrix': {
+                '&Assistant': {
                     'shortcut': QKeySequence('Ctrl+A'),
                     'signal': self.init_wizard
                 },
-                'Plot': {
+                '&Plot': {
                     'signal': lambda: print('todo'),
                 },
-                'Plot interpolators': {
+                'Plot &interpolators': {
                     'signal': lambda: print('todo'),
                 },
             },
-            'Help': {
-                'About': {
+            '&Help': {
+                '&About': {
                     'role': QAction.AboutRole,
                     'signal': lambda: print('todo'),
                 },
@@ -126,13 +126,13 @@ class SetupUIMixin(WizardMixin):
         for menu_name, actions in all_menus.items():
             # Menubar and its menus
             menu = QMenu(menubar)
-            menu.setTitle('&' + menu_name)
+            menu.setTitle(menu_name)
             menubar.addAction(menu.menuAction())
 
             # Actions inside each menu
             for action_name, action_info in actions.items():
                 action = QAction(MainWindow)
-                action.setText('&' + action_name)
+                action.setText(action_name)
                 menu.addAction(action)
 
                 menu_role = action_info.get('role', None)
