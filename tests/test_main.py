@@ -146,3 +146,35 @@ def test_main_ratings(qtbot):
     ui.matrix_widget.setItem(2, 1, QTableWidgetItem('3'))
     assert ui.matrix.df.loc['orange', 'color'] == 3
     assert ui.matrix_widget.item(2, 2).text() == '51.82%'
+
+
+def test_tabs(qtbot):
+    MainWindow = QMainWindow()
+    ui = main.Ui_MainWindow()
+    qtbot.addWidget(ui)
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+
+    assert ui.master_tab_widget.currentIndex() == 0
+    # mouse click doesn't work
+    ui.master_tab_widget.setCurrentIndex(1)
+    assert ui.master_tab_widget.currentIndex() == 1
+
+
+# Doesn't work
+#def test_continuous_criteria(qtbot):
+#    MainWindow = QMainWindow()
+#    ui = main.Ui_MainWindow()
+#    qtbot.addWidget(ui)
+#    ui.setupUi(MainWindow)
+#    MainWindow.show()
+#
+#    ui.master_tab_widget.setCurrentIndex(1)
+#    qtbot.keyClicks(ui.line_edit_data_tab, 'price')
+#    assert ui.line_edit_data_tab.text() == 'price'
+#
+#    # Neither enter key nor mouse click on criterion_button worked
+#    #qtbot.keyClick(ui.line_edit_data_tab, Qt.Key_Enter)
+#    #qtbot.mouseClick(ui.criterion_button, Qt.LeftButton)
+#
+#    ui.add_continuous_criteria()

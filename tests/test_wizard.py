@@ -242,7 +242,7 @@ def test_continuous_criteria_none(qtbot):
     assert type(w.currentPage()) == wizard.RatingPage
 
 
-def test_continuous_criteria(qtbot):
+def test_continuous_criteria_wizard_page(qtbot):
     w = wizard.Wizard()
     w.page(wizard.Page.Weights).collection = lambda: ['color', 'taste']
     w.matrix = Matrix()
