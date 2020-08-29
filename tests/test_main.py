@@ -99,6 +99,7 @@ def test_main_weights(qtbot):
     assert ui.matrix_widget.item(1, 2).text() == '0.0%'
     assert ui.matrix_widget.item(2, 2).text() == '0.0%'
 
+
 def test_main_ratings(qtbot):
     MainWindow = QMainWindow()
     ui = main.Ui_MainWindow()
@@ -161,20 +162,77 @@ def test_tabs(qtbot):
     assert ui.master_tab_widget.currentIndex() == 1
 
 
-# Doesn't work
-#def test_continuous_criteria(qtbot):
-#    MainWindow = QMainWindow()
-#    ui = main.Ui_MainWindow()
-#    qtbot.addWidget(ui)
-#    ui.setupUi(MainWindow)
-#    MainWindow.show()
-#
-#    ui.master_tab_widget.setCurrentIndex(1)
-#    qtbot.keyClicks(ui.line_edit_data_tab, 'price')
-#    assert ui.line_edit_data_tab.text() == 'price'
-#
-#    # Neither enter key nor mouse click on criterion_button worked
-#    #qtbot.keyClick(ui.line_edit_data_tab, Qt.Key_Enter)
-#    #qtbot.mouseClick(ui.criterion_button, Qt.LeftButton)
-#
-#    ui.add_continuous_criteria()
+def test_add_continuous_criteria(qtbot):
+    MainWindow = QMainWindow()
+    ui = main.Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    # Notice that QMainWindow is registered as the widget
+    qtbot.addWidget(MainWindow)
+    MainWindow.show()
+
+    ui.master_tab_widget.setCurrentIndex(1)
+    qtbot.keyClicks(ui.line_edit_data_tab, 'price')
+    assert ui.line_edit_data_tab.text() == 'price'
+
+    assert ui.inner_tab_widget.count() == 0
+    qtbot.keyClick(ui.line_edit_data_tab, Qt.Key_Enter)
+    assert ui.line_edit_data_tab.text() == ''
+    assert ui.inner_tab_widget.count() == 1
+    assert 'price' in ui.matrix.continuous_criteria
+
+    table = ui.inner_tab_widget.currentWidget().layout().itemAt(0).widget()
+    assert table.columnCount() == 2
+    assert table.horizontalHeaderItem(0).text() == 'price'
+    assert table.horizontalHeaderItem(1).text() == 'price_score'
+    assert table.rowCount() == 1
+
+    assert ui.inner_tab_widget.count() == 1
+    qtbot.keyClicks(ui.line_edit_data_tab, 'size')
+    qtbot.mouseClick(ui.criterion_button, Qt.LeftButton)  # Button works as well
+    assert ui.inner_tab_widget.count() == 2
+    assert 'size' in ui.matrix.continuous_criteria
+
+    ui.inner_tab_widget.setCurrentIndex(1)
+    table = ui.inner_tab_widget.currentWidget().layout().itemAt(0).widget()
+    assert table.columnCount() == 2
+    assert table.horizontalHeaderItem(0).text() == 'size'
+    assert table.horizontalHeaderItem(1).text() == 'size_score'
+    assert table.rowCount() == 1
+
+
+def test_score_continuous_criterion(qtbot):
+    MainWindow = QMainWindow()
+    ui = main.Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    # Notice that QMainWindow is registered as the widget
+    qtbot.addWidget(MainWindow)
+    MainWindow.show()
+
+    # Setup
+    ui.master_tab_widget.setCurrentIndex(1)
+    qtbot.keyClicks(ui.line_edit_data_tab, 'price')
+    #qtbot.keyClick(ui.line_edit_data_tab, Qt.Key_Enter)
+    qtbot.mouseClick(ui.criterion_button, Qt.LeftButton)  # Button works as well
+    table = ui.inner_tab_widget.currentWidget().layout().itemAt(0).widget()
+
+    table.setItem(0, 0, QTableWidgetItem('0'))
+    assert table.rowCount() == 1
+    table.setItem(0, 1, QTableWidgetItem('10'))
+    assert 'price' in ui.matrix.value_score_df.columns
+    assert ui.matrix.value_score_df.loc[0, 'price'] == 0
+    assert ui.matrix.value_score_df.loc[0, 'price_score'] == 10
+    # After completing both columns, a new row automatically appears
+    assert table.rowCount() == 2
+
+    table.setItem(1, 0, QTableWidgetItem('10'))
+    table.setItem(1, 1, QTableWidgetItem('5'))
+    assert ui.matrix.value_score_df.loc[1, 'price'] == 10
+    assert ui.matrix.value_score_df.loc[1, 'price_score'] == 5
+
+    table.setItem(1, 1, QTableWidgetItem('9'))
+    assert ui.matrix.value_score_df.loc[1, 'price_score'] == 9
+    # Changing one cell does not affect everything else
+    assert ui.matrix.value_score_df.loc[0, 'price'] == 0
+    assert ui.matrix.value_score_df.loc[0, 'price_score'] == 10
+    assert ui.matrix.value_score_df.loc[1, 'price'] == 10
+
