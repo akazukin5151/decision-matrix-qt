@@ -195,6 +195,8 @@ class DataTabMixin:
         for row in range(1, self.matrix_widget.rowCount()):
             self.set_cell_uneditable(row, col)
 
+        self.line_edit_data_tab.setFocus()
+
     def value_score_tab_cell_changed(self, table, row, column):
         value = table.item(row, 0)
         score = table.item(row, 1)
