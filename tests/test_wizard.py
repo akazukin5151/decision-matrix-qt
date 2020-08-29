@@ -67,7 +67,7 @@ def test_criteria_wizard_page(qtbot):
     assert type(w.currentPage()) == wizard.CriteriaPage
 
     # Test page
-    abstract_multi_input_page_tester(qtbot, w, 'taste', 'size', 'columns')
+    abstract_multi_input_page_tester(qtbot, w, 'taste', 'color', 'columns')
     assert w.next_button.isEnabled() is True
 
 
@@ -100,7 +100,7 @@ def abstract_slider_page_tester(qtbot, w):
 
 def test_weights_wizard_page_basic(qtbot):
     w = wizard.Wizard()
-    w.page(wizard.Page.Weights).collection = lambda: ['size', 'taste']
+    w.page(wizard.Page.Weights).collection = lambda: ['color', 'taste']
     w.matrix = Matrix()
     qtbot.addWidget(w)
     w.show()
@@ -110,7 +110,7 @@ def test_weights_wizard_page_basic(qtbot):
     qtbot.keyClicks(w.currentPage().line_edit, 'apple')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
     qtbot.mouseClick(w.next_button, Qt.LeftButton)
-    qtbot.keyClicks(w.currentPage().line_edit, 'size')
+    qtbot.keyClicks(w.currentPage().line_edit, 'color')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
     qtbot.keyClicks(w.currentPage().line_edit, 'taste')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
@@ -126,7 +126,7 @@ def test_weights_wizard_page_basic(qtbot):
 
 def test_ratings_basic(qtbot):
     w = wizard.Wizard()
-    w.page(wizard.Page.Weights).collection = lambda: ['size', 'taste']
+    w.page(wizard.Page.Weights).collection = lambda: ['color', 'taste']
     w.matrix = Matrix()
     qtbot.addWidget(w)
     w.show()
@@ -138,7 +138,7 @@ def test_ratings_basic(qtbot):
     qtbot.keyClicks(w.currentPage().line_edit, 'orange')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
     qtbot.mouseClick(w.next_button, Qt.LeftButton)
-    qtbot.keyClicks(w.currentPage().line_edit, 'size')
+    qtbot.keyClicks(w.currentPage().line_edit, 'color')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
     qtbot.keyClicks(w.currentPage().line_edit, 'taste')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
@@ -211,7 +211,7 @@ def test_welcome_page_advanced(qtbot):
 
 def test_continuous_criteria_none(qtbot):
     w = wizard.Wizard()
-    w.page(wizard.Page.Weights).collection = lambda: ['size', 'taste']
+    w.page(wizard.Page.Weights).collection = lambda: ['color', 'taste']
     w.matrix = Matrix()
     qtbot.addWidget(w)
     w.show()
@@ -225,7 +225,7 @@ def test_continuous_criteria_none(qtbot):
     qtbot.keyClicks(w.currentPage().line_edit, 'orange')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
     qtbot.mouseClick(w.next_button, Qt.LeftButton)
-    qtbot.keyClicks(w.currentPage().line_edit, 'size')
+    qtbot.keyClicks(w.currentPage().line_edit, 'color')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
     qtbot.keyClicks(w.currentPage().line_edit, 'taste')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
@@ -244,7 +244,7 @@ def test_continuous_criteria_none(qtbot):
 
 def test_continuous_criteria(qtbot):
     w = wizard.Wizard()
-    w.page(wizard.Page.Weights).collection = lambda: ['size', 'taste']
+    w.page(wizard.Page.Weights).collection = lambda: ['color', 'taste']
     w.matrix = Matrix()
     qtbot.addWidget(w)
     w.show()
@@ -258,7 +258,7 @@ def test_continuous_criteria(qtbot):
     qtbot.keyClicks(w.currentPage().line_edit, 'orange')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
     qtbot.mouseClick(w.next_button, Qt.LeftButton)
-    qtbot.keyClicks(w.currentPage().line_edit, 'size')
+    qtbot.keyClicks(w.currentPage().line_edit, 'color')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
     qtbot.keyClicks(w.currentPage().line_edit, 'taste')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
@@ -308,7 +308,7 @@ def test_continuous_criteria(qtbot):
 
 def test_continuous_criteria_weights(qtbot):
     w = wizard.Wizard()
-    w.page(wizard.Page.Weights).collection = lambda: ['size', 'taste']
+    w.page(wizard.Page.Weights).collection = lambda: ['color', 'taste']
     w.matrix = Matrix()
     qtbot.addWidget(w)
     w.show()
@@ -322,7 +322,7 @@ def test_continuous_criteria_weights(qtbot):
     qtbot.keyClicks(w.currentPage().line_edit, 'orange')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
     qtbot.mouseClick(w.next_button, Qt.LeftButton)
-    qtbot.keyClicks(w.currentPage().line_edit, 'size')
+    qtbot.keyClicks(w.currentPage().line_edit, 'color')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
     qtbot.keyClicks(w.currentPage().line_edit, 'taste')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
@@ -347,7 +347,7 @@ def test_continuous_criteria_weights(qtbot):
 
 def test_data_wizard_page(qtbot):
     w = wizard.Wizard()
-    w.page(wizard.Page.Weights).collection = lambda: ['size', 'taste']
+    w.page(wizard.Page.Weights).collection = lambda: ['color', 'taste']
     w.matrix = Matrix()
     qtbot.addWidget(w)
     w.show()
@@ -361,7 +361,7 @@ def test_data_wizard_page(qtbot):
     qtbot.keyClicks(w.currentPage().line_edit, 'orange')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
     qtbot.mouseClick(w.next_button, Qt.LeftButton)
-    qtbot.keyClicks(w.currentPage().line_edit, 'size')
+    qtbot.keyClicks(w.currentPage().line_edit, 'color')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
     qtbot.keyClicks(w.currentPage().line_edit, 'taste')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
