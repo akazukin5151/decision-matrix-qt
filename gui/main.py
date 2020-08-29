@@ -70,6 +70,7 @@ class MatrixTabMixin:
 
         self.lineEdit.clear()
         self.set_last_column_uneditable()
+        self.set_continuous_cells_uneditable()
 
         self.matrix.add_choices(new_row_name)
 
@@ -109,6 +110,12 @@ class MatrixTabMixin:
         self.matrix.add_criterion(new_col_name, weight=float('nan'))
 
     ## Sub-routines
+    def set_continuous_cells_uneditable(self):
+        for continuous_idx, criterion in enumerate(self.matrix.all_criteria):
+            if criterion in self.matrix.continuous_criteria:
+                for row in range(1, self.matrix_widget.rowCount()):
+                    self.set_cell_uneditable(row, continuous_idx)
+
     def max_total_changed(self, column):
         new_weight = self.matrix_widget.item(0, column)
         criterion_name = self.matrix_widget.horizontalHeaderItem(column)
