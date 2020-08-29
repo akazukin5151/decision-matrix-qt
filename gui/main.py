@@ -178,6 +178,13 @@ class DataTabMixin:
         self.line_edit_data_tab.clear()
         self.matrix.add_continuous_criterion(criterion_name, weight=float('nan'))
 
+        # Add criteria to the main tab
+        self.lineEdit.setText(criterion_name)
+        self.add_column()
+        # Set rating cells for those criteria to be uneditable
+        col = self.matrix_widget.columnCount() - 2
+        for row in range(1, self.matrix_widget.rowCount()):
+            self.set_cell_uneditable(row, col)
 
     def value_score_tab_cell_changed(self, table, row, column):
         value = table.item(row, 0)
@@ -216,6 +223,11 @@ class DataTabMixin:
             table.setVerticalHeaderItem(current_row_count, QTableWidgetItem())
 
     ## Subroutines
+    def set_cell_uneditable(self, row, column):
+        if not (item := self.matrix_widget.item(row, column)):
+            item = QTableWidgetItem()
+        self.set_item_uneditable(item, row, column)
+
     def remove_last_row_if_last_two_empty(self, table):
         if table.rowCount() < 2:
             return
