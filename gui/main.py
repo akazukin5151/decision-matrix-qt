@@ -7,8 +7,6 @@ from PySide2.QtWidgets import (
     QWidget,
     QGridLayout,
     QTableWidgetItem,
-    QApplication,
-    QMainWindow,
 )
 
 from gui.setup import SetupUIMixin
