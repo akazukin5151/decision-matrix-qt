@@ -223,11 +223,6 @@ class DataTabMixin:
             table.setVerticalHeaderItem(current_row_count, QTableWidgetItem())
 
     ## Subroutines
-    def set_cell_uneditable(self, row, column):
-        if not (item := self.matrix_widget.item(row, column)):
-            item = QTableWidgetItem()
-        self.set_item_uneditable(item, row, column)
-
     def remove_last_row_if_last_two_empty(self, table):
         if table.rowCount() < 2:
             return

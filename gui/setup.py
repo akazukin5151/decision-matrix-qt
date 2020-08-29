@@ -24,11 +24,15 @@ _translate = QCoreApplication.translate
 
 class SetupUIMixin(WizardMixin):
     # Utils for both setup and tab 1
+    def set_cell_uneditable(self, row, column):
+        if not (item := self.matrix_widget.takeItem(row, column)):
+            item = QTableWidgetItem()
+        self.set_item_uneditable(item, row, column)
+
     def set_last_column_uneditable(self):
-        if (last_col := self.matrix_widget.columnCount()):
+        if (col_count := self.matrix_widget.columnCount()):
             for row in range(self.matrix_widget.rowCount()):
-                item = QTableWidgetItem()
-                self.set_item_uneditable(item, row, last_col - 1)
+                self.set_cell_uneditable(row, col_count - 1)
 
     def set_item_uneditable(self, item, row, column):
         flags = (
