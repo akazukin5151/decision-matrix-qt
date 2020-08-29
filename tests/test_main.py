@@ -1,7 +1,11 @@
 import numpy as np
 from unittest.mock import Mock, call
 from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QApplication, QMainWindow
+from PySide2.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QTableWidgetItem
+)
 
 from matrix import Matrix
 
@@ -59,3 +63,82 @@ def test_main_add_criteria(qtbot):
     qtbot.keyClick(ui.lineEdit, Qt.Key_Enter)
     assert ui.matrix_widget.columnCount() == 3
     assert ui.matrix_widget.horizontalHeaderItem(1).text() == 'color'
+
+
+def test_main_weights(qtbot):
+    MainWindow = QMainWindow()
+    ui = main.Ui_MainWindow()
+    qtbot.addWidget(ui)
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+
+    # Setup
+    qtbot.keyClicks(ui.lineEdit, 'apple')
+    qtbot.mouseClick(ui.pushButton, Qt.LeftButton)
+    qtbot.keyClicks(ui.lineEdit, 'orange')
+    qtbot.keyClick(ui.lineEdit, Qt.Key_Enter)
+
+    qtbot.mouseClick(ui.combo_box, Qt.LeftButton)
+    qtbot.keyClick(ui.combo_box, Qt.Key_Down)
+    qtbot.keyClick(ui.combo_box, Qt.Key_Enter)
+
+    qtbot.keyClicks(ui.lineEdit, 'taste')
+    qtbot.mouseClick(ui.pushButton, Qt.LeftButton)
+
+    qtbot.keyClicks(ui.lineEdit, 'color')
+    qtbot.keyClick(ui.lineEdit, Qt.Key_Enter)
+
+    # Neither clicks or tab key works
+    ui.matrix_widget.setItem(0, 0, QTableWidgetItem('4'))
+    assert ui.matrix.df.loc['Weight', 'taste'] == 4
+    assert ui.matrix_widget.item(0, 2).text() == '40.0'
+    assert ui.matrix_widget.item(1, 2).text() == '0.0%'
+    assert ui.matrix_widget.item(2, 2).text() == '0.0%'
+
+def test_main_ratings(qtbot):
+    MainWindow = QMainWindow()
+    ui = main.Ui_MainWindow()
+    qtbot.addWidget(ui)
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+
+    # Setup
+    qtbot.keyClicks(ui.lineEdit, 'apple')
+    qtbot.mouseClick(ui.pushButton, Qt.LeftButton)
+    qtbot.keyClicks(ui.lineEdit, 'orange')
+    qtbot.keyClick(ui.lineEdit, Qt.Key_Enter)
+
+    qtbot.mouseClick(ui.combo_box, Qt.LeftButton)
+    qtbot.keyClick(ui.combo_box, Qt.Key_Down)
+    qtbot.keyClick(ui.combo_box, Qt.Key_Enter)
+
+    qtbot.keyClicks(ui.lineEdit, 'taste')
+    qtbot.mouseClick(ui.pushButton, Qt.LeftButton)
+
+    qtbot.keyClicks(ui.lineEdit, 'color')
+    qtbot.keyClick(ui.lineEdit, Qt.Key_Enter)
+
+    ui.matrix_widget.setItem(0, 0, QTableWidgetItem('4'))
+
+    # Tests
+    ui.matrix_widget.setItem(0, 1, QTableWidgetItem('7'))
+    assert ui.matrix.df.loc['Weight', 'color'] == 7
+    assert ui.matrix_widget.item(0, 2).text() == '110.0'
+    assert ui.matrix_widget.item(1, 2).text() == '0.0%'
+    assert ui.matrix_widget.item(2, 2).text() == '0.0%'
+
+    ui.matrix_widget.setItem(1, 0, QTableWidgetItem('6'))
+    assert ui.matrix.df.loc['apple', 'taste'] == 6
+    assert ui.matrix_widget.item(1, 2).text() == '21.82%'
+
+    ui.matrix_widget.setItem(1, 1, QTableWidgetItem('5'))
+    assert ui.matrix.df.loc['apple', 'color'] == 5
+    assert ui.matrix_widget.item(1, 2).text() == '53.64%'
+
+    ui.matrix_widget.setItem(2, 0, QTableWidgetItem('9'))
+    assert ui.matrix.df.loc['orange', 'taste'] == 9
+    assert ui.matrix_widget.item(2, 2).text() == '32.73%'
+
+    ui.matrix_widget.setItem(2, 1, QTableWidgetItem('3'))
+    assert ui.matrix.df.loc['orange', 'color'] == 3
+    assert ui.matrix_widget.item(2, 2).text() == '51.82%'
