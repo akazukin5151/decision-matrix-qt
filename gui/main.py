@@ -11,7 +11,7 @@ from PySide2.QtWidgets import (
     QMainWindow,
 )
 
-from setup import SetupUIMixin
+from gui.setup import SetupUIMixin
 
 
 _translate = QCoreApplication.translate
@@ -239,17 +239,3 @@ class DataTabMixin:
 class Ui_MainWindow(SetupUIMixin, MatrixTabMixin, DataTabMixin):
     pass
 
-
-def main(args):
-    app = QApplication(args)
-    MainWindow = QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
-
-
-if __name__ == "__main__":
-    import sys
-
-    main(sys.argv)

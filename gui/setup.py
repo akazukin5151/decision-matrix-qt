@@ -16,7 +16,7 @@ from PySide2.QtWidgets import (
     QMenu,
 )
 
-from wizard import WizardMixin
+from gui.wizard import WizardMixin
 
 
 _translate = QCoreApplication.translate
