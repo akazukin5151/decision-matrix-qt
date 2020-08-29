@@ -32,11 +32,13 @@ def test_main_add_choices(qtbot):
     assert ui.lineEdit.text() == ''
     assert ui.matrix_widget.rowCount() == 2
     assert ui.matrix_widget.verticalHeaderItem(1).text() == 'apple'
+    assert 'apple' in ui.matrix.df.index
 
     qtbot.keyClicks(ui.lineEdit, 'orange')
     qtbot.keyClick(ui.lineEdit, Qt.Key_Enter)
     assert ui.matrix_widget.rowCount() == 3
     assert ui.matrix_widget.verticalHeaderItem(2).text() == 'orange'
+    assert 'orange' in ui.matrix.df.index
 
 
 def test_main_add_criteria(qtbot):
@@ -58,11 +60,13 @@ def test_main_add_criteria(qtbot):
     assert ui.lineEdit.text() == ''
     assert ui.matrix_widget.columnCount() == 2
     assert ui.matrix_widget.horizontalHeaderItem(0).text() == 'taste'
+    assert 'taste' in ui.matrix.df.columns
 
     qtbot.keyClicks(ui.lineEdit, 'color')
     qtbot.keyClick(ui.lineEdit, Qt.Key_Enter)
     assert ui.matrix_widget.columnCount() == 3
     assert ui.matrix_widget.horizontalHeaderItem(1).text() == 'color'
+    assert 'color' in ui.matrix.df.columns
 
 
 def test_main_weights(qtbot):
