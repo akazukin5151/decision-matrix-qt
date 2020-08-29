@@ -236,3 +236,57 @@ def test_score_continuous_criterion(qtbot):
     assert ui.matrix.value_score_df.loc[0, 'price_score'] == 10
     assert ui.matrix.value_score_df.loc[1, 'price'] == 10
 
+
+def test_score_continuous_criteria(qtbot):
+    MainWindow = QMainWindow()
+    ui = main.Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    # Notice that QMainWindow is registered as the widget
+    qtbot.addWidget(MainWindow)
+    MainWindow.show()
+
+    # Setup
+    ui.master_tab_widget.setCurrentIndex(1)
+    qtbot.keyClicks(ui.line_edit_data_tab, 'price')
+    qtbot.keyClick(ui.line_edit_data_tab, Qt.Key_Enter)
+
+    qtbot.keyClicks(ui.line_edit_data_tab, 'size')
+    qtbot.mouseClick(ui.criterion_button, Qt.LeftButton)
+
+    assert ui.inner_tab_widget.count() == 2
+
+    # Test
+    ui.inner_tab_widget.setCurrentIndex(0)
+    table = ui.inner_tab_widget.currentWidget().layout().itemAt(0).widget()
+    table.setItem(0, 0, QTableWidgetItem('0'))
+    table.setItem(0, 1, QTableWidgetItem('10'))
+    table.setItem(1, 0, QTableWidgetItem('10'))
+    table.setItem(1, 1, QTableWidgetItem('5'))
+    assert ui.matrix.value_score_df.loc[0, 'price'] == 0
+    assert ui.matrix.value_score_df.loc[0, 'price_score'] == 10
+    assert ui.matrix.value_score_df.loc[1, 'price'] == 10
+    assert ui.matrix.value_score_df.loc[1, 'price_score'] == 5
+
+    ui.inner_tab_widget.setCurrentIndex(1)
+    table = ui.inner_tab_widget.currentWidget().layout().itemAt(0).widget()
+    table.setItem(0, 0, QTableWidgetItem('0'))
+    table.setItem(0, 1, QTableWidgetItem('10'))
+    table.setItem(1, 0, QTableWidgetItem('3'))
+    table.setItem(1, 1, QTableWidgetItem('5'))
+    assert ui.matrix.value_score_df.loc[0, 'size'] == 0
+    assert ui.matrix.value_score_df.loc[0, 'size_score'] == 10
+    assert ui.matrix.value_score_df.loc[1, 'size'] == 3
+    assert ui.matrix.value_score_df.loc[1, 'size_score'] == 5
+
+    # Each cell should be independent
+    ui.inner_tab_widget.setCurrentIndex(0)
+    table = ui.inner_tab_widget.currentWidget().layout().itemAt(0).widget()
+    table.setItem(0, 0, QTableWidgetItem('1'))
+    assert ui.matrix.value_score_df.loc[0, 'price'] == 1
+    assert ui.matrix.value_score_df.loc[0, 'price_score'] == 10
+    assert ui.matrix.value_score_df.loc[1, 'price'] == 10
+    assert ui.matrix.value_score_df.loc[1, 'price_score'] == 5
+    assert ui.matrix.value_score_df.loc[0, 'size'] == 0
+    assert ui.matrix.value_score_df.loc[0, 'size_score'] == 10
+    assert ui.matrix.value_score_df.loc[1, 'size'] == 3
+    assert ui.matrix.value_score_df.loc[1, 'size_score'] == 5
