@@ -69,6 +69,7 @@ class MatrixTabMixin:
         item.setText(new_row_name)
 
         self.lineEdit.clear()
+        self.lineEdit.setFocus()
         self.set_last_column_uneditable()
         self.set_continuous_cells_uneditable()
 
@@ -106,6 +107,7 @@ class MatrixTabMixin:
         new.setText(new_col_name)
 
         self.lineEdit.clear()
+        self.lineEdit.setFocus()
 
         self.matrix.add_criterion(new_col_name, weight=float('nan'))
 
