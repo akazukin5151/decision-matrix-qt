@@ -210,7 +210,6 @@ class DataTabMixin:
         # Row removed
         if value.text() == '' and score.text() == '':
             self.matrix.remove_criterion_value_to_score(row)
-            print(self.matrix.value_score_df)
             return
 
         if len(self.matrix.value_score_df.columns) == 0:
@@ -220,8 +219,6 @@ class DataTabMixin:
             # to avoid this.
             self.matrix.value_score_df.loc[row, criterion] = value_f
             self.matrix.value_score_df.loc[row, criterion + '_score'] = score_f
-
-        print(self.matrix.value_score_df)
 
         # Add new row if both cells in the last row is full
         last_value = table.item(table.rowCount() - 1, 0)
