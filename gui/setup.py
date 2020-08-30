@@ -157,8 +157,11 @@ class SetupUIMixin(WizardMixin):
         self.master_tab_widget = QTabWidget(self.centralwidget)
         self.matrix_tab = QWidget()
         self.data_tab = QWidget()
+        self.actual_data_tab = QWidget()
         self.master_tab_widget.addTab(self.matrix_tab, "Matrix")
-        self.master_tab_widget.addTab(self.data_tab, "Data")
+        # FIXME: rename all instances of data first
+        self.master_tab_widget.addTab(self.data_tab, "Continuous criteria")
+        self.master_tab_widget.addTab(self.actual_data_tab, "Data")
 
     def add_inner_tab(self):
         self.inner_tab_widget = QTabWidget(self.data_tab)
