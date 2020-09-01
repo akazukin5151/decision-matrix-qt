@@ -171,6 +171,7 @@ class ChoicesPage(AbstractMultiInputPage):
     def matrix_remove(self, index):
         idx = self.parent_wizard.main_parent.matrix.df.index[index + 1]  # Weight is first row
         self.parent_wizard.main_parent.matrix.df.drop(idx, inplace=True)
+        # TODO: remove rows
 
 
 class CriteriaPage(AbstractMultiInputPage):
@@ -184,10 +185,13 @@ class CriteriaPage(AbstractMultiInputPage):
 
     def matrix_add(self, name):
         self.parent_wizard.main_parent.matrix.add_criterion(name, weight=np.nan)
+        self.parent_wizard.main_parent.lineEdit.setText(name)
+        self.parent_wizard.main_parent.add_column()
 
     def matrix_remove(self, index):
         idx = self.parent_wizard.main_parent.matrix.df.columns[index]
         self.parent_wizard.main_parent.matrix.df.drop(idx, axis='columns', inplace=True)
+        # TODO: remove columns
 
 
 class ContinuousCriteriaPage(EnableNextOnBackMixin, QWizardPage):
