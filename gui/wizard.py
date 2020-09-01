@@ -40,8 +40,9 @@ class Page(IntEnum):
 
 
 class Wizard(QWizard):
-    def __init__(self, *args):
-        super(Wizard, self).__init__(*args)
+    def __init__(self, parent):
+        super(Wizard, self).__init__(parent.main_window)
+        self.main_parent = parent
         self.setWindowTitle('Assistant')
         #self.setOption(QWizard.IndependentPages)
         self.setOption(QWizard.NoCancelButtonOnLastPage)
@@ -618,7 +619,11 @@ class ConclusionPage(QWizardPage):
 
 class WizardMixin:
     def init_wizard(self):
-        self.wizard = Wizard(self.main_window)
+        if self.matrix.df.shape != (1, 0):
+            print('todo')
+            # TODO: Reflect edits in table to wizard
+
+        self.wizard = Wizard(self)
         self.wizard.matrix = weakref.proxy(self.matrix)
         self.wizard.finished.connect(self.get_data)
         self.wizard.rejected.connect(self.rejected)
@@ -627,6 +632,7 @@ class WizardMixin:
     def get_data(self, _):
         print(self.wizard.field('basic'))
         print(self.matrix)
+        # TODO: update table as wizard changes
 
     def rejected(self):
         self.matrix = Matrix()
