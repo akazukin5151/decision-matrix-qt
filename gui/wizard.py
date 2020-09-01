@@ -352,7 +352,7 @@ class WeightsPage(AbstractSliderPage):
         # Rate their relative importance
 
     def matrix_action(self, index, value):
-        self.parent_wizard.main_parent.matrix.df.loc['Weight'].iloc[index] = value
+        self.parent_wizard.main_parent.matrix.df.iloc[0, index] = value
         self.parent_wizard.main_parent.matrix_widget.setItem(0, index, QTableWidgetItem(str(value)))
 
     def nextId(self):
