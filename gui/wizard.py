@@ -353,7 +353,9 @@ class WeightsPage(AbstractSliderPage):
 
     def matrix_action(self, index, value):
         self.parent_wizard.main_parent.matrix.df.iloc[0, index] = value
-        self.parent_wizard.main_parent.matrix_widget.setItem(0, index, QTableWidgetItem(str(value)))
+        self.parent_wizard.main_parent.matrix_widget.setItem(
+            0, index, QTableWidgetItem(str(value))
+        )
 
     def nextId(self):
         if self.field('basic'):
@@ -370,6 +372,10 @@ class ContinuousCriteriaWeightsPage(AbstractSliderPage):
     def matrix_action(self, index, value):
         criterion = self.parent_wizard.main_parent.matrix.continuous_criteria[index]
         self.parent_wizard.main_parent.matrix.df.loc['Weight', criterion] = value
+        col = index + len(list(self.parent_wizard.main_parent.matrix.criteria))
+        self.parent_wizard.main_parent.matrix_widget.setItem(
+            0, col, QTableWidgetItem(str(value))
+        )
 
 
 class RatingPage(EnableNextOnBackMixin, QWizardPage):
