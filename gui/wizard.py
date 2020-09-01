@@ -643,14 +643,8 @@ class WizardMixin:
             # TODO: Reflect edits in table to wizard
 
         self.wizard = Wizard(self)
-        self.wizard.finished.connect(self.get_data)
         self.wizard.rejected.connect(self.rejected)
         self.wizard.show()
-
-    def get_data(self, _):
-        print(self.wizard.field('basic'))
-        print(self.matrix)
-        # TODO: update table as wizard changes
 
     def rejected(self):
         self.matrix = Matrix()
