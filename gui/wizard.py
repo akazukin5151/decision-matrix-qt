@@ -258,9 +258,8 @@ class ContinuousCriteriaPage(EnableNextOnBackMixin, QWizardPage):
         self.parent_wizard.next_button.setEnabled(True)
         self.delete_button.setEnabled(True)
 
-        self.parent_wizard.main_parent.matrix.add_continuous_criterion(name, weight=np.nan)
-        self.parent_wizard.main_parent.lineEdit.setText(name)
-        self.parent_wizard.main_parent.add_column()
+        self.parent_wizard.main_parent.line_edit_data_tab.setText(name)
+        self.parent_wizard.main_parent.add_continuous_criteria()
 
     def delete_item(self):
         # Completely copied (except list -> list_widget)
