@@ -80,6 +80,9 @@ class SetupUIMixin(WizardMixin):
         self.add_inner_tab()
         self.add_data_tab_grid()
 
+        # For actual data tab only
+        self.add_data()
+
         self.set_tab_key_order()
         QMetaObject.connectSlotsByName(MainWindow)
 
@@ -157,11 +160,10 @@ class SetupUIMixin(WizardMixin):
         self.master_tab_widget = QTabWidget(self.centralwidget)
         self.matrix_tab = QWidget()
         self.continuous_criteria_tab = QWidget()
-        self.actual_data_tab = QWidget()
+        self.data_tab = QWidget()
         self.master_tab_widget.addTab(self.matrix_tab, "Matrix")
-        # FIXME: rename all instances of data first
         self.master_tab_widget.addTab(self.continuous_criteria_tab, "Continuous criteria")
-        self.master_tab_widget.addTab(self.actual_data_tab, "Data")
+        self.master_tab_widget.addTab(self.data_tab, "Data")
 
     def add_inner_tab(self):
         self.inner_tab_widget = QTabWidget(self.continuous_criteria_tab)
@@ -233,3 +235,9 @@ class SetupUIMixin(WizardMixin):
         tableWidget.setRowCount(1)
         tableWidget.setVerticalHeaderItem(0, QTableWidgetItem())
         return tableWidget
+
+    def add_data(self):
+        self.data_grid = QGridLayout(self.data_tab)
+        label = QLabel('There are no continuous criteria yet, add one in the second tab')
+        self.data_grid.addWidget(label)
+
