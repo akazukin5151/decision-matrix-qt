@@ -164,7 +164,6 @@ class ChoicesPage(AbstractMultiInputPage):
         # What are you trying to choose between?
 
     def matrix_add(self, name):
-        self.parent_wizard.main_parent.matrix.add_choices(name)
         self.parent_wizard.main_parent.lineEdit.setText(name)
         self.parent_wizard.main_parent.add_row()
 
