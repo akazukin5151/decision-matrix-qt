@@ -240,4 +240,3 @@ class SetupUIMixin(WizardMixin):
         self.data_grid = QGridLayout(self.data_tab)
         label = QLabel('There are no continuous criteria yet, add one in the second tab')
         self.data_grid.addWidget(label)
-

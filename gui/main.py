@@ -7,9 +7,11 @@ from PySide2.QtWidgets import (
     QWidget,
     QGridLayout,
     QTableWidgetItem,
+    QLabel,
 )
 
 from gui.setup import SetupUIMixin
+from gui.wizard import AbstractDataLayout
 
 
 _translate = QCoreApplication.translate
@@ -22,6 +24,12 @@ def safe_float(string, fallback: 'T' = None) -> 'Union[float, T]':
         if fallback:
             return fallback
         return 0.0
+
+
+class DataTab(AbstractDataLayout):
+    def __init__(self, grid, matrix):
+        super().__init__(grid)
+        self.matrix = matrix
 
 
 class MatrixTabMixin:
@@ -194,6 +202,13 @@ class DataTabMixin:
         col = self.matrix_widget.columnCount() - 2
         for row in range(1, self.matrix_widget.rowCount()):
             self.set_cell_uneditable(row, col)
+
+        # Add to data tab
+        if type(self.data_grid.itemAt(0).widget()) == QLabel:
+            self.data_grid.takeAt(0).widget().deleteLater()
+
+        page = DataTab(self.data_grid, self.matrix)
+        page.initializePage([criterion_name])
 
         self.line_edit_data_tab.setFocus()
 

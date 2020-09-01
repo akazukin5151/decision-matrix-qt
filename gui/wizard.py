@@ -453,14 +453,10 @@ class RatingPage(EnableNextOnBackMixin, QWizardPage):
         self.parent_wizard.main_parent.matrix_widget.setItem(row, col, item)
 
 
-# Before syncing values between tab 1 and 2, need to put this in tab 3
-class DataPage(EnableNextOnBackMixin, QWizardPage):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.parent_wizard = weakref.proxy(parent)
-        self.setTitle('Data')
-        self.grid = QGridLayout(self)
-        self.setLayout(self.grid)
+class AbstractDataLayout:
+    def __init__(self, grid):
+        self.matrix: 'pd.DataFrame'  # Subclasses must provide this attribute
+        self.grid = grid
         self.has_value = False
         self.has_score = False
         # Outer dict maps the criteria name to the last row
@@ -469,8 +465,7 @@ class DataPage(EnableNextOnBackMixin, QWizardPage):
         self.value_spin_boxes: 'dict[str, list[QSpinBox]]' = {}
         self.score_spin_boxes: 'dict[str, list[QSpinBox]]' = {}
 
-    def initializePage(self):
-        self.parent_wizard.next_button.setDisabled(True)
+    def initializePage(self, criteria):
         # Maps each criteria to their vertical layouts
         self.vertical_layouts: 'dict[str, QVBoxLayout]' = {}
 
@@ -496,8 +491,7 @@ class DataPage(EnableNextOnBackMixin, QWizardPage):
         # |----> groupbox 2 (for criteria 2)
         #        |----> self.vertical_layout[1]
         #               |-...
-
-        for idx, criterion in enumerate(self.parent_wizard.main_parent.matrix.continuous_criteria):
+        for idx, criterion in enumerate(criteria):
             self.rows_for_each_criteria[criterion] = 0
             groupbox = QGroupBox(criterion)
             vertical_layout = QVBoxLayout(groupbox)
@@ -519,7 +513,6 @@ class DataPage(EnableNextOnBackMixin, QWizardPage):
         if not self.has_score:
             return
 
-        self.parent_wizard.next_button.setEnabled(True)
         score = self.score_spin_boxes[criterion][index].value()
         self.update_matrix(value, score, criterion, index)
 
@@ -528,18 +521,17 @@ class DataPage(EnableNextOnBackMixin, QWizardPage):
         if not self.has_value:
             return
 
-        self.parent_wizard.next_button.setEnabled(True)
         value = self.value_spin_boxes[criterion][index].value()
         self.update_matrix(value, score, criterion, index)
 
     def update_matrix(self, value, score, criterion, index):
-        if len(self.parent_wizard.main_parent.matrix.value_score_df.columns) == 0:
-            self.parent_wizard.main_parent.matrix.criterion_value_to_score(criterion, {value: score})
+        if len(self.matrix.value_score_df.columns) == 0:
+            self.matrix.criterion_value_to_score(criterion, {value: score})
         else:
             # Think the API must support modifications by index
             # to avoid this.
-            self.parent_wizard.main_parent.matrix.value_score_df.loc[index, criterion] = value
-            self.parent_wizard.main_parent.matrix.value_score_df.loc[index, criterion + '_score'] = score
+            self.matrix.value_score_df.loc[index, criterion] = value
+            self.matrix.value_score_df.loc[index, criterion + '_score'] = score
 
 
     def add_row(self, criterion, deleteable=True):
@@ -567,7 +559,6 @@ class DataPage(EnableNextOnBackMixin, QWizardPage):
         score_spin_box.valueChanged.connect(cb)
 
         inner_grid = QGridLayout()
-        #inner_grid.addWidget(QLabel('If ' + str(criterion) + ' is '), index, 0)
         inner_grid.addWidget(value_spin_box, index, 0)
         inner_grid.addWidget(QLabel('then score should be '), index, 1)
         inner_grid.addWidget(score_spin_box, index, 2)
@@ -586,7 +577,7 @@ class DataPage(EnableNextOnBackMixin, QWizardPage):
 
     def delete(self, criterion, idx):
         pair = [criterion, criterion + '_score']
-        self.parent_wizard.main_parent.matrix.value_score_df.loc[idx, pair] = np.nan
+        self.matrix.value_score_df.loc[idx, pair] = np.nan
         self.rows_for_each_criteria[criterion] -= 1
 
         # Last item is the add button; get second last item
@@ -609,6 +600,29 @@ class DataPage(EnableNextOnBackMixin, QWizardPage):
 
         # Remove the form
         self.vertical_layouts[criterion].removeItem(form)
+
+
+class DataPage(EnableNextOnBackMixin, AbstractDataLayout, QWizardPage):
+    def __init__(self, parent):
+        QWizardPage.__init__(self, parent)
+        AbstractDataLayout.__init__(self, QGridLayout(self))
+        self.parent_wizard = weakref.proxy(parent)
+        self.matrix = self.parent_wizard.main_parent.matrix
+        self.setTitle('Data')
+
+    def initializePage(self):
+        self.parent_wizard.next_button.setDisabled(True)
+        super().initializePage(self.matrix.continuous_criteria)
+
+    def value_changed(self, criterion, index, value):
+        if self.has_score:
+            self.parent_wizard.next_button.setEnabled(True)
+        super().value_changed(criterion, index, value)
+
+    def score_changed(self, criterion, index, score):
+        if self.has_value:
+            self.parent_wizard.next_button.setEnabled(True)
+        super().score_changed(criterion, index, score)
 
 
 class ConclusionPage(QWizardPage):
