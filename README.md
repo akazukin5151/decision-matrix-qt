@@ -10,6 +10,8 @@ The only reason why I used Qt is because Gtk doesn't have a user-editable table 
 
 Now, using gtk opens up a lot more possibilities. The API and the GUI can be rewritten in a language that can be statically compiled to make distribution even possible. (PyInstaller would have to bundle in numpy, pandas, scipy, and matplotlib -- yikes!)
 
+**Update:** apparently gtk doesn't allow assistants to share state between pages. So the solution is to write custom dialogs, or use a one-page interface. Regardless I think at this point I should just complete this first.
+
 
 ## Installation
 
