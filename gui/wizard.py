@@ -74,7 +74,7 @@ class Wizard(QWizard):
 
 class EnableNextOnBackMixin:
     def cleanupPage(self):
-        self.parent.next_button.setEnabled(True)
+        self.parent_wizard.next_button.setEnabled(True)
 
 
 class WelcomePage(QWizardPage):
@@ -165,6 +165,8 @@ class ChoicesPage(AbstractMultiInputPage):
 
     def matrix_add(self, name):
         self.parent_wizard.main_parent.matrix.add_choices(name)
+        self.parent_wizard.main_parent.lineEdit.setText(name)
+        self.parent_wizard.main_parent.add_row()
 
     def matrix_remove(self, index):
         idx = self.parent_wizard.main_parent.matrix.df.index[index + 1]  # Weight is first row
