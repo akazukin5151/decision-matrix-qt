@@ -453,6 +453,7 @@ class RatingPage(EnableNextOnBackMixin, QWizardPage):
         self.parent_wizard.main_parent.matrix_widget.setItem(row, col, item)
 
 
+# Before syncing values between tab 1 and 2, need to put this in tab 3
 class DataPage(EnableNextOnBackMixin, QWizardPage):
     def __init__(self, parent):
         super().__init__(parent)

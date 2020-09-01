@@ -156,15 +156,15 @@ class SetupUIMixin(WizardMixin):
     def add_master_tabs(self):
         self.master_tab_widget = QTabWidget(self.centralwidget)
         self.matrix_tab = QWidget()
-        self.data_tab = QWidget()
+        self.continuous_criteria_tab = QWidget()
         self.actual_data_tab = QWidget()
         self.master_tab_widget.addTab(self.matrix_tab, "Matrix")
         # FIXME: rename all instances of data first
-        self.master_tab_widget.addTab(self.data_tab, "Continuous criteria")
+        self.master_tab_widget.addTab(self.continuous_criteria_tab, "Continuous criteria")
         self.master_tab_widget.addTab(self.actual_data_tab, "Data")
 
     def add_inner_tab(self):
-        self.inner_tab_widget = QTabWidget(self.data_tab)
+        self.inner_tab_widget = QTabWidget(self.continuous_criteria_tab)
 
     def add_master_grid(self):
         self.app_grid_layout = QGridLayout(self.centralwidget)
@@ -179,18 +179,18 @@ class SetupUIMixin(WizardMixin):
 
     def add_data_tab_grid(self):
         label = QLabel('Continuous criterion')
-        self.data_tab_grid_layout = QGridLayout(self.data_tab)
-        self.data_tab_grid_layout.addWidget(label, 0, 0, 1, 1)
-        self.data_tab_grid_layout.addWidget(self.line_edit_data_tab, 0, 1, 1, 1)
-        self.data_tab_grid_layout.addWidget(self.criterion_button, 0, 2, 1, 1)
-        self.data_tab_grid_layout.addWidget(self.inner_tab_widget, 1, 0, 1, 3)
+        self.continuous_criteria_tab_grid_layout = QGridLayout(self.continuous_criteria_tab)
+        self.continuous_criteria_tab_grid_layout.addWidget(label, 0, 0, 1, 1)
+        self.continuous_criteria_tab_grid_layout.addWidget(self.line_edit_data_tab, 0, 1, 1, 1)
+        self.continuous_criteria_tab_grid_layout.addWidget(self.criterion_button, 0, 2, 1, 1)
+        self.continuous_criteria_tab_grid_layout.addWidget(self.inner_tab_widget, 1, 0, 1, 3)
 
     def add_input_bar(self):
         self.lineEdit = QLineEdit(self.matrix_tab)
         self.lineEdit.returnPressed.connect(self.add_row)
 
     def add_input_bar_data_tab(self):
-        self.line_edit_data_tab = QLineEdit(self.data_tab)
+        self.line_edit_data_tab = QLineEdit(self.continuous_criteria_tab)
         self.line_edit_data_tab.returnPressed.connect(self.add_continuous_criteria)
 
     def add_enter_button(self):
