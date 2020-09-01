@@ -442,6 +442,10 @@ class RatingPage(EnableNextOnBackMixin, QWizardPage):
     def value_changed(self, choice, criterion, value):
         self.parent_wizard.main_parent.matrix.rate_choices({choice: {criterion: value}})
         self.parent_wizard.next_button.setEnabled(True)
+        item = QTableWidgetItem(str(value))
+        row = self.parent_wizard.main_parent.matrix.df.index.get_loc(choice)
+        col = self.parent_wizard.main_parent.matrix.df.columns.get_loc(criterion)
+        self.parent_wizard.main_parent.matrix_widget.setItem(row, col, item)
 
 
 class DataPage(EnableNextOnBackMixin, QWizardPage):
