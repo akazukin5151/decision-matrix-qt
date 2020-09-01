@@ -22,6 +22,7 @@ from PySide2.QtWidgets import (
     QFormLayout,
     QHBoxLayout,
     QSizePolicy,
+    QTableWidgetItem,
 )
 
 from matrix import Matrix
@@ -258,6 +259,8 @@ class ContinuousCriteriaPage(EnableNextOnBackMixin, QWizardPage):
         self.delete_button.setEnabled(True)
 
         self.parent_wizard.main_parent.matrix.add_continuous_criterion(name, weight=np.nan)
+        self.parent_wizard.main_parent.lineEdit.setText(name)
+        self.parent_wizard.main_parent.add_column()
 
     def delete_item(self):
         # Completely copied (except list -> list_widget)
@@ -268,6 +271,7 @@ class ContinuousCriteriaPage(EnableNextOnBackMixin, QWizardPage):
         if self.list_widget.count() == 0:
             self.delete_button.setDisabled(True)
             self.parent_wizard.next_button.setDisabled(True)
+        # TODO: remove column
 
     def matrix_remove(self, index):
         idx = self.parent_wizard.main_parent.matrix.continuous_criteria.pop(index)
@@ -349,6 +353,7 @@ class WeightsPage(AbstractSliderPage):
 
     def matrix_action(self, index, value):
         self.parent_wizard.main_parent.matrix.df.loc['Weight'].iloc[index] = value
+        self.parent_wizard.main_parent.matrix_widget.setItem(0, index, QTableWidgetItem(str(value)))
 
     def nextId(self):
         if self.field('basic'):
