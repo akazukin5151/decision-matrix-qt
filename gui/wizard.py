@@ -101,7 +101,7 @@ class WelcomePage(QWizardPage):
 class AbstractMultiInputPage(EnableNextOnBackMixin, QWizardPage):
     def __init__(self, parent):
         QWizardPage.__init__(self, parent)
-        self.parent = weakref.proxy(parent)
+        self.parent_wizard = weakref.proxy(parent)
 
         self.label = QLabel()
         self.line_edit = QLineEdit()
@@ -125,7 +125,7 @@ class AbstractMultiInputPage(EnableNextOnBackMixin, QWizardPage):
 
     def initializePage(self):
         if self.list.count() == 0:
-            self.parent.next_button.setDisabled(True)
+            self.parent_wizard.next_button.setDisabled(True)
 
     def add_item(self):
         if not (name := self.line_edit.text()):
@@ -135,7 +135,7 @@ class AbstractMultiInputPage(EnableNextOnBackMixin, QWizardPage):
         self.matrix_add(name)
         self.line_edit.clear()
         self.line_edit.setFocus()
-        self.parent.next_button.setEnabled(True)
+        self.parent_wizard.next_button.setEnabled(True)
         self.delete_button.setEnabled(True)
 
     def delete_item(self):
@@ -145,7 +145,7 @@ class AbstractMultiInputPage(EnableNextOnBackMixin, QWizardPage):
         self.matrix_remove(index)
         if self.list.count() == 0:
             self.delete_button.setDisabled(True)
-            self.parent.next_button.setDisabled(True)
+            self.parent_wizard.next_button.setDisabled(True)
 
     def matrix_add(self, name):
         raise NotImplementedError
@@ -164,11 +164,11 @@ class ChoicesPage(AbstractMultiInputPage):
         # What are you trying to choose between?
 
     def matrix_add(self, name):
-        self.parent.matrix.add_choices(name)
+        self.parent_wizard.main_parent.matrix.add_choices(name)
 
     def matrix_remove(self, index):
-        idx = self.parent.matrix.df.index[index + 1]  # Weight is first row
-        self.parent.matrix.df.drop(idx, inplace=True)
+        idx = self.parent_wizard.main_parent.matrix.df.index[index + 1]  # Weight is first row
+        self.parent_wizard.main_parent.matrix.df.drop(idx, inplace=True)
 
 
 class CriteriaPage(AbstractMultiInputPage):
@@ -181,17 +181,17 @@ class CriteriaPage(AbstractMultiInputPage):
         # What characteristics does the choices have that matters?
 
     def matrix_add(self, name):
-        self.parent.matrix.add_criterion(name, weight=np.nan)
+        self.parent_wizard.main_parent.matrix.add_criterion(name, weight=np.nan)
 
     def matrix_remove(self, index):
-        idx = self.parent.matrix.df.columns[index]
-        self.parent.matrix.df.drop(idx, axis='columns', inplace=True)
+        idx = self.parent_wizard.main_parent.matrix.df.columns[index]
+        self.parent_wizard.main_parent.matrix.df.drop(idx, axis='columns', inplace=True)
 
 
 class ContinuousCriteriaPage(EnableNextOnBackMixin, QWizardPage):
     def __init__(self, parent):
         super().__init__(parent)
-        self.parent = weakref.proxy(parent)
+        self.parent_wizard = weakref.proxy(parent)
 
         self.setTitle('Continuous criteria')
         # Radio button, if yes then ask for inputs
@@ -235,11 +235,11 @@ class ContinuousCriteriaPage(EnableNextOnBackMixin, QWizardPage):
             self.line_edit.setEnabled(True)
             self.list_widget.setEnabled(True)
             self.add_button.setEnabled(True)
-            self.parent.next_button.setDisabled(True)
+            self.parent_wizard.next_button.setDisabled(True)
         else:
             self.line_edit.setDisabled(True)
             self.list_widget.setDisabled(True)
-            self.parent.next_button.setEnabled(True)
+            self.parent_wizard.next_button.setEnabled(True)
 
     def add_item(self):
         # Duplicated
@@ -249,10 +249,10 @@ class ContinuousCriteriaPage(EnableNextOnBackMixin, QWizardPage):
         self.list_widget.addItem(item)
         self.line_edit.clear()
         self.line_edit.setFocus()
-        self.parent.next_button.setEnabled(True)
+        self.parent_wizard.next_button.setEnabled(True)
         self.delete_button.setEnabled(True)
 
-        self.parent.matrix.add_continuous_criterion(name, weight=np.nan)
+        self.parent_wizard.main_parent.matrix.add_continuous_criterion(name, weight=np.nan)
 
     def delete_item(self):
         # Completely copied (except list -> list_widget)
@@ -262,11 +262,11 @@ class ContinuousCriteriaPage(EnableNextOnBackMixin, QWizardPage):
         self.matrix_remove(index)
         if self.list_widget.count() == 0:
             self.delete_button.setDisabled(True)
-            self.parent.next_button.setDisabled(True)
+            self.parent_wizard.next_button.setDisabled(True)
 
     def matrix_remove(self, index):
-        idx = self.parent.matrix.continuous_criteria.pop(index)
-        self.parent.matrix.df.drop(idx, axis='columns', inplace=True)
+        idx = self.parent_wizard.main_parent.matrix.continuous_criteria.pop(index)
+        self.parent_wizard.main_parent.matrix.df.drop(idx, axis='columns', inplace=True)
 
     def nextId(self):
         if self.yes.isChecked():
@@ -277,13 +277,13 @@ class ContinuousCriteriaPage(EnableNextOnBackMixin, QWizardPage):
 class AbstractSliderPage(EnableNextOnBackMixin, QWizardPage):
     def __init__(self, parent):
         QWizardPage.__init__(self, parent)
-        self.parent = weakref.proxy(parent)
+        self.parent_wizard = weakref.proxy(parent)
         self.grid = QGridLayout(self)
         self.setLayout(self.grid)
         self.collection: 'func[] -> Iterable[str]'
 
     def initializePage(self):
-        self.parent.next_button.setDisabled(True)
+        self.parent_wizard.next_button.setDisabled(True)
         self.sliders = []
         self.spin_boxes = []
 
@@ -323,12 +323,12 @@ class AbstractSliderPage(EnableNextOnBackMixin, QWizardPage):
 
     def slider_changed(self, index, value):
         self.spin_boxes[index].setValue(value)
-        self.parent.next_button.setEnabled(True)
+        self.parent_wizard.next_button.setEnabled(True)
         self.matrix_action(index, value)  # Only need to be triggered once
 
     def spin_box_changed(self, index, value):
         self.sliders[index].setValue(value)
-        self.parent.next_button.setEnabled(True)
+        self.parent_wizard.next_button.setEnabled(True)
 
     def matrix_action(self, index, value):
         raise NotImplementedError
@@ -337,13 +337,13 @@ class AbstractSliderPage(EnableNextOnBackMixin, QWizardPage):
 class WeightsPage(AbstractSliderPage):
     def __init__(self, parent):
         super().__init__(parent)
-        self.collection = lambda: self.parent.matrix.df.columns
+        self.collection = lambda: self.parent_wizard.main_parent.matrix.df.columns
         self.setTitle('Weights')
         # Assign weights to your criteria
         # Rate their relative importance
 
     def matrix_action(self, index, value):
-        self.parent.matrix.df.loc['Weight'].iloc[index] = value
+        self.parent_wizard.main_parent.matrix.df.loc['Weight'].iloc[index] = value
 
     def nextId(self):
         if self.field('basic'):
@@ -354,18 +354,18 @@ class WeightsPage(AbstractSliderPage):
 class ContinuousCriteriaWeightsPage(AbstractSliderPage):
     def __init__(self, parent):
         super().__init__(parent)
-        self.collection = lambda: self.parent.matrix.continuous_criteria
+        self.collection = lambda: self.parent_wizard.main_parent.matrix.continuous_criteria
         self.setTitle('Continuous criteria weights')
 
     def matrix_action(self, index, value):
-        criterion = self.parent.matrix.continuous_criteria[index]
-        self.parent.matrix.df.loc['Weight', criterion] = value
+        criterion = self.parent_wizard.main_parent.matrix.continuous_criteria[index]
+        self.parent_wizard.main_parent.matrix.df.loc['Weight', criterion] = value
 
 
 class RatingPage(EnableNextOnBackMixin, QWizardPage):
     def __init__(self, parent):
         super().__init__(parent)
-        self.parent = weakref.proxy(parent)
+        self.parent_wizard = weakref.proxy(parent)
         self.setTitle('Ratings')
         self.grid = QGridLayout(self)
         self.setLayout(self.grid)
@@ -373,7 +373,7 @@ class RatingPage(EnableNextOnBackMixin, QWizardPage):
         self.sliders: dict[str, list[QSlider]] = {}
 
     def initializePage(self):
-        self.parent.next_button.setDisabled(True)
+        self.parent_wizard.next_button.setDisabled(True)
         # grid
         # |----> groupbox 1 (for choice 1)
         #        |----> vertical_layout 1
@@ -387,14 +387,14 @@ class RatingPage(EnableNextOnBackMixin, QWizardPage):
         #        |-...
         # TODO: consider extracting out common code with
         # AbstractSliderPage
-        for choice in self.parent.matrix.df.index[1:]:
+        for choice in self.parent_wizard.main_parent.matrix.df.index[1:]:
             groupbox = QGroupBox(choice)
             vertical_layout = QVBoxLayout(groupbox)
             self.grid.addWidget(groupbox)
             self.spin_boxes[choice] = []
             self.sliders[choice] = []
 
-            for row, criterion in enumerate(self.parent.matrix.criteria):
+            for row, criterion in enumerate(self.parent_wizard.main_parent.matrix.criteria):
                 rating_spin_box = QSpinBox()
                 rating_spin_box.setRange(0, 10)
                 self.spin_boxes[choice].append(rating_spin_box)
@@ -422,22 +422,22 @@ class RatingPage(EnableNextOnBackMixin, QWizardPage):
 
     def slider_changed(self, row, choice, criterion, value):
         self.spin_boxes[choice][row].setValue(value)
-        self.parent.next_button.setEnabled(True)
+        self.parent_wizard.next_button.setEnabled(True)
         self.value_changed(choice, criterion, value)  # Only need to be triggered once
 
     def spin_box_changed(self, row, choice, criterion, value):
         self.sliders[choice][row].setValue(value)
-        self.parent.next_button.setEnabled(True)
+        self.parent_wizard.next_button.setEnabled(True)
 
     def value_changed(self, choice, criterion, value):
-        self.parent.matrix.rate_choices({choice: {criterion: value}})
-        self.parent.next_button.setEnabled(True)
+        self.parent_wizard.main_parent.matrix.rate_choices({choice: {criterion: value}})
+        self.parent_wizard.next_button.setEnabled(True)
 
 
 class DataPage(EnableNextOnBackMixin, QWizardPage):
     def __init__(self, parent):
         super().__init__(parent)
-        self.parent = weakref.proxy(parent)
+        self.parent_wizard = weakref.proxy(parent)
         self.setTitle('Data')
         self.grid = QGridLayout(self)
         self.setLayout(self.grid)
@@ -450,7 +450,7 @@ class DataPage(EnableNextOnBackMixin, QWizardPage):
         self.score_spin_boxes: 'dict[str, list[QSpinBox]]' = {}
 
     def initializePage(self):
-        self.parent.next_button.setDisabled(True)
+        self.parent_wizard.next_button.setDisabled(True)
         # Maps each criteria to their vertical layouts
         self.vertical_layouts: 'dict[str, QVBoxLayout]' = {}
 
@@ -477,7 +477,7 @@ class DataPage(EnableNextOnBackMixin, QWizardPage):
         #        |----> self.vertical_layout[1]
         #               |-...
 
-        for idx, criterion in enumerate(self.parent.matrix.continuous_criteria):
+        for idx, criterion in enumerate(self.parent_wizard.main_parent.matrix.continuous_criteria):
             self.rows_for_each_criteria[criterion] = 0
             groupbox = QGroupBox(criterion)
             vertical_layout = QVBoxLayout(groupbox)
@@ -499,7 +499,7 @@ class DataPage(EnableNextOnBackMixin, QWizardPage):
         if not self.has_score:
             return
 
-        self.parent.next_button.setEnabled(True)
+        self.parent_wizard.next_button.setEnabled(True)
         score = self.score_spin_boxes[criterion][index].value()
         self.update_matrix(value, score, criterion, index)
 
@@ -508,18 +508,18 @@ class DataPage(EnableNextOnBackMixin, QWizardPage):
         if not self.has_value:
             return
 
-        self.parent.next_button.setEnabled(True)
+        self.parent_wizard.next_button.setEnabled(True)
         value = self.value_spin_boxes[criterion][index].value()
         self.update_matrix(value, score, criterion, index)
 
     def update_matrix(self, value, score, criterion, index):
-        if len(self.parent.matrix.value_score_df.columns) == 0:
-            self.parent.matrix.criterion_value_to_score(criterion, {value: score})
+        if len(self.parent_wizard.main_parent.matrix.value_score_df.columns) == 0:
+            self.parent_wizard.main_parent.matrix.criterion_value_to_score(criterion, {value: score})
         else:
             # Think the API must support modifications by index
             # to avoid this.
-            self.parent.matrix.value_score_df.loc[index, criterion] = value
-            self.parent.matrix.value_score_df.loc[index, criterion + '_score'] = score
+            self.parent_wizard.main_parent.matrix.value_score_df.loc[index, criterion] = value
+            self.parent_wizard.main_parent.matrix.value_score_df.loc[index, criterion + '_score'] = score
 
 
     def add_row(self, criterion, deleteable=True):
@@ -566,7 +566,7 @@ class DataPage(EnableNextOnBackMixin, QWizardPage):
 
     def delete(self, criterion, idx):
         pair = [criterion, criterion + '_score']
-        self.parent.matrix.value_score_df.loc[idx, pair] = np.nan
+        self.parent_wizard.main_parent.matrix.value_score_df.loc[idx, pair] = np.nan
         self.rows_for_each_criteria[criterion] -= 1
 
         # Last item is the add button; get second last item
@@ -594,12 +594,12 @@ class DataPage(EnableNextOnBackMixin, QWizardPage):
 class ConclusionPage(QWizardPage):
     def __init__(self, parent):
         super().__init__(parent)
-        self.parent = weakref.proxy(parent)
+        self.parent_wizard = weakref.proxy(parent)
         self.setTitle('All done!')
         self.setFinalPage(True)
 
     def initializePage(self):
-        self.parent.setButtonLayout([
+        self.parent_wizard.setButtonLayout([
             QWizard.Stretch,
             QWizard.BackButton,
             QWizard.CancelButton,
@@ -607,8 +607,8 @@ class ConclusionPage(QWizardPage):
         ])
 
     def cleanupPage(self):
-        self.parent.next_button.setEnabled(True)
-        self.parent.setButtonLayout([
+        self.parent_wizard.next_button.setEnabled(True)
+        self.parent_wizard.setButtonLayout([
             QWizard.Stretch,
             QWizard.BackButton,
             QWizard.CustomButton1,
@@ -624,7 +624,6 @@ class WizardMixin:
             # TODO: Reflect edits in table to wizard
 
         self.wizard = Wizard(self)
-        self.wizard.matrix = weakref.proxy(self.matrix)
         self.wizard.finished.connect(self.get_data)
         self.wizard.rejected.connect(self.rejected)
         self.wizard.show()
