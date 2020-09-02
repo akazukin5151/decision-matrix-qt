@@ -8,6 +8,8 @@ from PySide2.QtWidgets import (
     QGridLayout,
     QTableWidgetItem,
     QLabel,
+    QMessageBox,
+    QCheckBox,
 )
 
 from gui.setup import SetupUIMixin
@@ -118,6 +120,48 @@ class MatrixTabMixin:
         self.lineEdit.setFocus()
 
         self.matrix.add_criterion(new_col_name, weight=float('nan'))
+
+    def delete_row(self):
+        selected_ranges = self.matrix_widget.selectedRanges()
+
+        if len(selected_ranges) == 0:
+            return QMessageBox.warning(
+                None, 'Nothing selected', 'No rows were selected',
+                QMessageBox.Ok, QMessageBox.Ok
+            )
+
+        if len(selected_ranges) > 1:
+            return QMessageBox.warning(
+                None, 'Invalid selection', 'Multiple selection ranges are not allowed',
+                QMessageBox.Ok, QMessageBox.Ok
+            )
+
+        the_range = selected_ranges[0]
+        if the_range.bottomRow() == the_range.topRow():
+            message = 'Are you sure you want to remove this row/choice?'
+        else:
+            message = 'Are you sure you want to remove all of the selected rows/choices?'
+
+        if the_range.bottomRow() == 0:
+            return
+
+        msgbox = QMessageBox()
+        msgbox.setIcon(QMessageBox.Question)
+        msgbox.setText(message)
+        msgbox.setInformativeText('This action cannot be undone (for now)!')
+        msgbox.setStandardButtons(QMessageBox.Cancel | QMessageBox.Yes)
+        msgbox.setDefaultButton(QMessageBox.Yes)
+        cb = QCheckBox('Do not show this again')
+        msgbox.setCheckBox(cb)
+        # TODO: actually make this checkbox do something
+        if msgbox.exec() == QMessageBox.Cancel:
+            return
+
+        for row in reversed(range(the_range.topRow(), the_range.bottomRow() + 1)):
+            if row != 0:  # If weights row selected, do nothing silently
+                self.matrix_widget.removeRow(row)
+                self.matrix.df.drop(self.matrix.df.index[row], inplace=True)
+
 
     ## Sub-routines
     def set_continuous_cells_uneditable(self):

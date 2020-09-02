@@ -114,6 +114,9 @@ class SetupUIMixin(WizardMixin):
                     'shortcut': QKeySequence('Ctrl+A'),
                     'signal': self.init_wizard
                 },
+                'Delete selected &row': {
+                    'signal': self.delete_row,
+                },
                 '&Plot': {
                     'signal': lambda: print('todo'),
                 },
