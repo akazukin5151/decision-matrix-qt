@@ -23,6 +23,7 @@ from PySide2.QtWidgets import (
     QHBoxLayout,
     QSizePolicy,
     QTableWidgetItem,
+    QTableWidgetSelectionRange,
 )
 
 from matrix import Matrix
@@ -171,7 +172,7 @@ class ChoicesPage(AbstractMultiInputPage):
     def matrix_remove(self, index):
         idx = self.parent_wizard.main_parent.matrix.df.index[index + 1]  # Weight is first row
         self.parent_wizard.main_parent.matrix.df.drop(idx, inplace=True)
-        # TODO: remove rows
+        self.parent_wizard.main_parent.matrix_widget.removeRow(index + 1)
 
 
 class CriteriaPage(AbstractMultiInputPage):
