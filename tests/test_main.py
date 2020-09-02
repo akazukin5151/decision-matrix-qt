@@ -1,8 +1,5 @@
-import numpy as np
-from unittest.mock import Mock, call
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import (
-    QApplication,
     QMainWindow,
     QTableWidgetItem
 )
@@ -21,7 +18,7 @@ def test_safe_float():
 def test_main_add_choices(qtbot):
     MainWindow = QMainWindow()
     ui = main.Ui_MainWindow()
-    qtbot.addWidget(ui)
+    qtbot.addWidget(MainWindow)
     ui.setupUi(MainWindow)
     MainWindow.show()
 
@@ -44,7 +41,7 @@ def test_main_add_choices(qtbot):
 def test_main_add_criteria(qtbot):
     MainWindow = QMainWindow()
     ui = main.Ui_MainWindow()
-    qtbot.addWidget(ui)
+    qtbot.addWidget(MainWindow)
     ui.setupUi(MainWindow)
     MainWindow.show()
 
@@ -72,7 +69,7 @@ def test_main_add_criteria(qtbot):
 def test_main_weights(qtbot):
     MainWindow = QMainWindow()
     ui = main.Ui_MainWindow()
-    qtbot.addWidget(ui)
+    qtbot.addWidget(MainWindow)
     ui.setupUi(MainWindow)
     MainWindow.show()
 
@@ -103,7 +100,7 @@ def test_main_weights(qtbot):
 def test_main_ratings(qtbot):
     MainWindow = QMainWindow()
     ui = main.Ui_MainWindow()
-    qtbot.addWidget(ui)
+    qtbot.addWidget(MainWindow)
     ui.setupUi(MainWindow)
     MainWindow.show()
 
@@ -152,7 +149,7 @@ def test_main_ratings(qtbot):
 def test_tabs(qtbot):
     MainWindow = QMainWindow()
     ui = main.Ui_MainWindow()
-    qtbot.addWidget(ui)
+    qtbot.addWidget(MainWindow)
     ui.setupUi(MainWindow)
     MainWindow.show()
 

@@ -1,11 +1,11 @@
 import pytest
-import numpy as np
 from PySide2.QtCore import Qt
-from unittest.mock import Mock, call
+from PySide2.QtWidgets import QMainWindow
 
 from matrix import Matrix
 
 from gui import wizard
+from gui.main import Ui_MainWindow
 
 
 def abstract_multi_input_page_tester(qtbot, w, text1, text2, side):
@@ -23,9 +23,9 @@ def abstract_multi_input_page_tester(qtbot, w, text1, text2, side):
     assert w.currentPage().list.count() == 2
 
     if side == 'index':
-        assert (w.matrix.df.index[1:] == [text1, text2]).all()
+        assert (w.main_parent.matrix.df.index[1:] == [text1, text2]).all()
     else:
-        assert (w.matrix.df.columns == [text1, text2]).all()
+        assert (w.main_parent.matrix.df.columns == [text1, text2]).all()
 
     w.currentPage().list.setCurrentRow(1)
     qtbot.mouseClick(w.currentPage().delete_button, Qt.LeftButton)
@@ -33,18 +33,20 @@ def abstract_multi_input_page_tester(qtbot, w, text1, text2, side):
     assert w.currentPage().list.item(0).text() == text1
 
     if side == 'index':
-        assert (w.matrix.df.index[1:] == [text1]).all()
+        assert (w.main_parent.matrix.df.index[1:] == [text1]).all()
     else:
-        assert (w.matrix.df.columns == [text1]).all()
+        assert (w.main_parent.matrix.df.columns == [text1]).all()
 
 
 def test_choices_wizard_page(qtbot):
-    w = wizard.Wizard()
-    w.matrix = Matrix()
+    # Setup
+    MainWindow = QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    ui.matrix = Matrix()
+    w = wizard.Wizard(ui)
     qtbot.addWidget(w)
     w.show()
-
-    # Setup
     qtbot.mouseClick(w.next_button, Qt.LeftButton)
     assert type(w.currentPage()) == wizard.ChoicesPage
 
@@ -54,12 +56,14 @@ def test_choices_wizard_page(qtbot):
 
 
 def test_criteria_wizard_page(qtbot):
-    w = wizard.Wizard()
-    w.matrix = Matrix()
+    # Setup
+    MainWindow = QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    ui.matrix = Matrix()
+    w = wizard.Wizard(ui)
     qtbot.addWidget(w)
     w.show()
-
-    # Setup
     qtbot.mouseClick(w.next_button, Qt.LeftButton)
     qtbot.keyClicks(w.currentPage().line_edit, 'apple')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
@@ -99,13 +103,14 @@ def abstract_slider_page_tester(qtbot, w):
     )
 
 def test_weights_wizard_page_basic(qtbot):
-    w = wizard.Wizard()
-    w.page(wizard.Page.Weights).collection = lambda: ['color', 'taste']
-    w.matrix = Matrix()
+    # Setup
+    MainWindow = QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    ui.matrix = Matrix()
+    w = wizard.Wizard(ui)
     qtbot.addWidget(w)
     w.show()
-
-    # Setup
     qtbot.mouseClick(w.next_button, Qt.LeftButton)
     qtbot.keyClicks(w.currentPage().line_edit, 'apple')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
@@ -119,19 +124,20 @@ def test_weights_wizard_page_basic(qtbot):
 
     # Test page
     abstract_slider_page_tester(qtbot, w)
-    assert w.matrix.df.loc['Weight'][:-1][0] == 4
-
+    assert w.main_parent.matrix.df.loc['Weight'][:-1][0] == 4
     assert w.next_button.isEnabled() is True
 
 
 def test_ratings_basic(qtbot):
-    w = wizard.Wizard()
+    # Setup
+    MainWindow = QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    ui.matrix = Matrix()
+    w = wizard.Wizard(ui)
     w.page(wizard.Page.Weights).collection = lambda: ['color', 'taste']
-    w.matrix = Matrix()
     qtbot.addWidget(w)
     w.show()
-
-    # Setup
     qtbot.mouseClick(w.next_button, Qt.LeftButton)
     qtbot.keyClicks(w.currentPage().line_edit, 'apple')
     qtbot.keyClick(w.currentPage().line_edit, Qt.Key_Enter)
@@ -178,26 +184,31 @@ def test_ratings_basic(qtbot):
             )
 
     # First value is empty
-    assert (w.matrix.df.loc['Weight'][:-1] == [4, 7]).all()
-    assert (w.matrix.df.loc[:, 'Percentage'][1:] == [60, 60]).all()
+    assert (w.main_parent.matrix.df.loc['Weight'][:-1] == [4, 7]).all()
+    assert (w.main_parent.matrix.df.loc[:, 'Percentage'][1:] == [60, 60]).all()
 
     w.currentPage().spin_boxes['apple'][0].setValue(3)
-    assert w.matrix.df.loc[:, 'Percentage'][1] == 49.09090909090909
+    assert w.main_parent.matrix.df.loc[:, 'Percentage'][1] == 49.09090909090909
 
     w.currentPage().spin_boxes['apple'][1].setValue(7)
-    assert w.matrix.df.loc[:, 'Percentage'][1] == 55.45454545454545
+    assert w.main_parent.matrix.df.loc[:, 'Percentage'][1] == 55.45454545454545
 
     w.currentPage().spin_boxes['orange'][0].setValue(4)
-    assert w.matrix.df.loc[:, 'Percentage'][2] == 52.72727272727272
+    assert w.main_parent.matrix.df.loc[:, 'Percentage'][2] == 52.72727272727272
 
     w.currentPage().spin_boxes['orange'][1].setValue(7)
-    assert w.matrix.df.loc[:, 'Percentage'][2] == 59.09090909090909
+    assert w.main_parent.matrix.df.loc[:, 'Percentage'][2] == 59.09090909090909
 
     assert w.next_button.isEnabled() is True
 
 
 def test_welcome_page_advanced(qtbot):
-    w = wizard.Wizard()
+    # Setup
+    MainWindow = QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    ui.matrix = Matrix()
+    w = wizard.Wizard(ui)
     qtbot.addWidget(w)
     w.show()
 
@@ -210,13 +221,15 @@ def test_welcome_page_advanced(qtbot):
 
 
 def test_continuous_criteria_none(qtbot):
-    w = wizard.Wizard()
+    # Setup
+    MainWindow = QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    ui.matrix = Matrix()
+    w = wizard.Wizard(ui)
     w.page(wizard.Page.Weights).collection = lambda: ['color', 'taste']
-    w.matrix = Matrix()
     qtbot.addWidget(w)
     w.show()
-
-    # Setup
     advanced_radio = w.currentPage().layout().itemAt(1).widget()
     advanced_radio.setChecked(True)
     qtbot.mouseClick(w.next_button, Qt.LeftButton)
@@ -243,13 +256,15 @@ def test_continuous_criteria_none(qtbot):
 
 
 def test_continuous_criteria_wizard_page(qtbot):
-    w = wizard.Wizard()
+    # Setup
+    MainWindow = QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    ui.matrix = Matrix()
+    w = wizard.Wizard(ui)
     w.page(wizard.Page.Weights).collection = lambda: ['color', 'taste']
-    w.matrix = Matrix()
     qtbot.addWidget(w)
     w.show()
-
-    # Setup
     advanced_radio = w.currentPage().layout().itemAt(1).widget()
     advanced_radio.setChecked(True)
     qtbot.mouseClick(w.next_button, Qt.LeftButton)
@@ -292,28 +307,30 @@ def test_continuous_criteria_wizard_page(qtbot):
     assert w.currentPage().list_widget.item(1).text() == 'size'
     assert w.currentPage().list_widget.count() == 2
 
-    assert 'price' in w.matrix.df.columns
-    assert 'size' in w.matrix.df.columns
+    assert 'price' in w.main_parent.matrix.df.columns
+    assert 'size' in w.main_parent.matrix.df.columns
 
     w.currentPage().list_widget.setCurrentRow(1)
     qtbot.mouseClick(w.currentPage().delete_button, Qt.LeftButton)
     assert w.currentPage().list_widget.count() == 1
     assert w.currentPage().list_widget.item(0).text() == 'price'
 
-    assert 'price' in w.matrix.df.columns
-    assert 'size' not in w.matrix.df.columns
+    assert 'price' in w.main_parent.matrix.df.columns
+    assert 'size' not in w.main_parent.matrix.df.columns
 
     assert w.next_button.isEnabled() is True
 
 
 def test_continuous_criteria_weights(qtbot):
-    w = wizard.Wizard()
+    # Setup
+    MainWindow = QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    ui.matrix = Matrix()
+    w = wizard.Wizard(ui)
     w.page(wizard.Page.Weights).collection = lambda: ['color', 'taste']
-    w.matrix = Matrix()
     qtbot.addWidget(w)
     w.show()
-
-    # Setup
     advanced_radio = w.currentPage().layout().itemAt(1).widget()
     advanced_radio.setChecked(True)
     qtbot.mouseClick(w.next_button, Qt.LeftButton)
@@ -340,19 +357,20 @@ def test_continuous_criteria_weights(qtbot):
 
     # Test pages
     abstract_slider_page_tester(qtbot, w)
-    assert w.matrix.df.loc['Weight', 'price'] == 4
-
+    assert w.main_parent.matrix.df.loc['Weight', 'price'] == 4
     assert w.next_button.isEnabled() is True
 
 
 def test_data_wizard_page(qtbot):
-    w = wizard.Wizard()
+    # Setup
+    MainWindow = QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    ui.matrix = Matrix()
+    w = wizard.Wizard(ui)
     w.page(wizard.Page.Weights).collection = lambda: ['color', 'taste']
-    w.matrix = Matrix()
     qtbot.addWidget(w)
     w.show()
-
-    # Setup
     advanced_radio = w.currentPage().layout().itemAt(1).widget()
     advanced_radio.setChecked(True)
     qtbot.mouseClick(w.next_button, Qt.LeftButton)
@@ -409,35 +427,35 @@ def test_data_wizard_page(qtbot):
 
     # 0: First row
     w.currentPage().value_spin_boxes['price'][0].setValue(1)
-    assert 'price' not in w.matrix.value_score_df.columns
+    assert 'price' not in w.main_parent.matrix.value_score_df.columns
     w.currentPage().score_spin_boxes['price'][0].setValue(10)
-    assert 'price' in w.matrix.value_score_df.columns
-    assert w.matrix.value_score_df.loc[0, 'price'] == 1
-    assert w.matrix.value_score_df.loc[0, 'price_score'] == 10
+    assert 'price' in w.main_parent.matrix.value_score_df.columns
+    assert w.main_parent.matrix.value_score_df.loc[0, 'price'] == 1
+    assert w.main_parent.matrix.value_score_df.loc[0, 'price_score'] == 10
 
     w.currentPage().value_spin_boxes['price'][1].setValue(5)
     qtbot.mouseClick(w.currentPage().score_spin_boxes['price'][1], Qt.LeftButton)
     qtbot.keyClick(w.currentPage().score_spin_boxes['price'][1], Qt.Key_Up)
 
-    assert w.matrix.value_score_df.loc[1, 'price'] == 5
-    assert w.matrix.value_score_df.loc[1, 'price_score'] == 1
+    assert w.main_parent.matrix.value_score_df.loc[1, 'price'] == 5
+    assert w.main_parent.matrix.value_score_df.loc[1, 'price_score'] == 1
 
     # Changing values and scores of a row doesn't affect other rows
-    assert w.matrix.value_score_df.loc[0, 'price'] == 1
-    assert w.matrix.value_score_df.loc[0, 'price_score'] == 10
+    assert w.main_parent.matrix.value_score_df.loc[0, 'price'] == 1
+    assert w.main_parent.matrix.value_score_df.loc[0, 'price_score'] == 10
 
     w.currentPage().value_spin_boxes['size'][0].setValue(7)
     w.currentPage().score_spin_boxes['size'][0].setValue(1)
-    assert w.matrix.value_score_df.loc[0, 'size'] == 7
-    assert w.matrix.value_score_df.loc[0, 'size_score'] == 1
+    assert w.main_parent.matrix.value_score_df.loc[0, 'size'] == 7
+    assert w.main_parent.matrix.value_score_df.loc[0, 'size_score'] == 1
 
     w.currentPage().value_spin_boxes['size'][1].setValue(6)
     w.currentPage().score_spin_boxes['size'][1].setValue(5)
-    assert w.matrix.value_score_df.loc[1, 'size'] == 6
-    assert w.matrix.value_score_df.loc[1, 'size_score'] == 5
+    assert w.main_parent.matrix.value_score_df.loc[1, 'size'] == 6
+    assert w.main_parent.matrix.value_score_df.loc[1, 'size_score'] == 5
 
     # Changing values and scores of a criterion doesn't affect other criteria
-    assert w.matrix.value_score_df.loc[0, 'price'] == 1
-    assert w.matrix.value_score_df.loc[0, 'price_score'] == 10
+    assert w.main_parent.matrix.value_score_df.loc[0, 'price'] == 1
+    assert w.main_parent.matrix.value_score_df.loc[0, 'price_score'] == 10
 
     assert w.next_button.isEnabled() is True
