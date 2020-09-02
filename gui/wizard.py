@@ -29,6 +29,10 @@ from PySide2.QtWidgets import (
 from matrix import Matrix
 
 
+def clear_layout(layout):
+    while (child := layout.takeAt(0)):
+        del child
+
 class Page(IntEnum):
     Welcome = auto()
     Choices = auto()
@@ -278,14 +282,13 @@ class ContinuousCriteriaPage(EnableNextOnBackMixin, QWizardPage):
         self.parent_wizard.main_parent.matrix_widget.removeColumn(index)
 
         # Delete everything inside that criterion's tab and the tab
-        (self.parent_wizard.main_parent.inner_tab_widget
-            .widget(index).layout().deleteLater())
+        clear_layout(self.parent_wizard.main_parent
+                     .inner_tab_widget.widget(index).layout())
         self.parent_wizard.main_parent.inner_tab_widget.removeTab(index)
 
         # Remove the section in the data tab
         groupbox = self.parent_wizard.main_parent.data_grid.takeAt(index).widget()
-        while (child := groupbox.layout().takeAt(0)):
-            del child
+        clear_layout(groupbox.layout())
         self.parent_wizard.main_parent.data_grid.removeWidget(groupbox)
         groupbox.deleteLater()
 
@@ -600,8 +603,8 @@ class AbstractDataLayout:
 
         # Remove inner grid (second item in the form)
         inner_grid = form.takeAt(1)
-        for i in reversed(range(inner_grid.count())):
-            inner_grid.takeAt(i).widget().deleteLater()
+        while (child := inner_grid.takeAt(0)):
+            child.widget().deleteLater()
         del inner_grid
         self.value_spin_boxes[criterion].pop(idx)
         self.score_spin_boxes[criterion].pop(idx)
