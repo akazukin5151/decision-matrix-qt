@@ -287,7 +287,7 @@ class ContinuousCriteriaPage(EnableNextOnBackMixin, QWizardPage):
         while (child := groupbox.layout().takeAt(0)):
             del child
         self.parent_wizard.main_parent.data_grid.removeWidget(groupbox)
-        del groupbox
+        groupbox.deleteLater()
 
     def nextId(self):
         if self.yes.isChecked():
