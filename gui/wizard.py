@@ -192,7 +192,7 @@ class CriteriaPage(AbstractMultiInputPage):
     def matrix_remove(self, index):
         idx = self.parent_wizard.main_parent.matrix.df.columns[index]
         self.parent_wizard.main_parent.matrix.df.drop(idx, axis='columns', inplace=True)
-        # TODO: remove columns
+        self.parent_wizard.main_parent.matrix_widget.removeColumn(index)
 
 
 class ContinuousCriteriaPage(EnableNextOnBackMixin, QWizardPage):
