@@ -124,31 +124,40 @@ class MatrixTabMixin:
     def delete_row(self):
         bottom_fn = lambda x: x.topRow()
         top_fn = lambda x: x.bottomRow()
-        the_range = self.delete_row_or_column(bottom_fn, top_fn, 'choice row', 0)
-        if not the_range:
+        selected_ranges = self.delete_row_or_column(bottom_fn, top_fn, 'choice row', 0)
+        if not selected_ranges:
             return
 
-        for row in reversed(range(the_range.topRow(), the_range.bottomRow() + 1)):
-            if row != 0:  # If weights row selected, do nothing silently
-                self.matrix_widget.removeRow(row)
-                self.matrix.df.drop(self.matrix.df.index[row], inplace=True)
+        deleted_rows = []
+        for the_range in reversed(selected_ranges):
+            rows = range(the_range.topRow(), the_range.bottomRow() + 1)
+            for row in reversed(rows):
+                # If weights row selected, do nothing silently
+                if row != 0 and row not in deleted_rows:
+                    self.matrix_widget.removeRow(row)
+                    self.matrix.df.drop(self.matrix.df.index[row], inplace=True)
+                    deleted_rows.append(row)
 
     def delete_column(self):
         percentage_col = self.matrix_widget.columnCount() - 1
         bottom_fn = lambda x: x.leftColumn()
         top_fn = lambda x: x.rightColumn()
-        the_range = self.delete_row_or_column(
+        selected_ranges = self.delete_row_or_column(
             bottom_fn, top_fn, 'criteria column', percentage_col
         )
-        if not the_range:
+        if not selected_ranges:
             return
 
-        for col in reversed(range(the_range.leftColumn(), the_range.rightColumn() + 1)):
-            if col != percentage_col:
-                self.matrix_widget.removeColumn(col)
-                self.matrix.df.drop(
-                    self.matrix.df.columns[col], axis='columns', inplace=True
-                )
+        deleted_columns = []
+        for the_range in reversed(selected_ranges):
+            cols = range(the_range.leftColumn(), the_range.rightColumn() + 1)
+            for col in reversed(cols):
+                if col != percentage_col and col not in deleted_columns:
+                    self.matrix_widget.removeColumn(col)
+                    self.matrix.df.drop(
+                        self.matrix.df.columns[col], axis='columns', inplace=True
+                    )
+                    deleted_columns.append(col)
 
 
     ## Sub-routines
@@ -190,25 +199,22 @@ class MatrixTabMixin:
         selected_ranges = self.matrix_widget.selectedRanges()
 
         if len(selected_ranges) == 0:
-            return QMessageBox.warning(
+            QMessageBox.warning(
                 None, 'Nothing selected', 'No rows were selected',
                 QMessageBox.Ok, QMessageBox.Ok
             )
-
-        if len(selected_ranges) > 1:
-            return QMessageBox.warning(
-                None, 'Invalid selection', 'Multiple selection ranges are not allowed',
-                QMessageBox.Ok, QMessageBox.Ok
-            )
-
-        the_range = selected_ranges[0]
-        if top_fn(the_range) == condition and bottom_fn(the_range) == condition:
             return
 
-        if bottom_fn(the_range) == top_fn(the_range):
-            message = f'Are you sure you want to remove this {name}?'
-        else:
-            message = f'Are you sure you want to remove all of the selected {name}s?'
+        # Multiple ranges or one range that spans multiple row/column
+        message = f'Are you sure you want to remove all of the selected {name}s?'
+        if len(selected_ranges) == 1:
+            the_range = selected_ranges[0]
+            if bottom_fn(the_range) == condition and top_fn(the_range) == condition:
+                return
+
+            # Only one range, so if both are the same then there's only one row/column
+            if bottom_fn(the_range) == top_fn(the_range):
+                message = f'Are you sure you want to remove this {name}?'
 
         msgbox = QMessageBox()
         msgbox.setIcon(QMessageBox.Question)
@@ -221,7 +227,7 @@ class MatrixTabMixin:
         # TODO: actually make this checkbox do something
         if msgbox.exec() == QMessageBox.Cancel:
             return
-        return the_range
+        return selected_ranges
 
 
 class DataTabMixin:
