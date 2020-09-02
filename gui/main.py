@@ -122,45 +122,33 @@ class MatrixTabMixin:
         self.matrix.add_criterion(new_col_name, weight=float('nan'))
 
     def delete_row(self):
-        selected_ranges = self.matrix_widget.selectedRanges()
-
-        if len(selected_ranges) == 0:
-            return QMessageBox.warning(
-                None, 'Nothing selected', 'No rows were selected',
-                QMessageBox.Ok, QMessageBox.Ok
-            )
-
-        if len(selected_ranges) > 1:
-            return QMessageBox.warning(
-                None, 'Invalid selection', 'Multiple selection ranges are not allowed',
-                QMessageBox.Ok, QMessageBox.Ok
-            )
-
-        the_range = selected_ranges[0]
-        if the_range.bottomRow() == the_range.topRow():
-            message = 'Are you sure you want to remove this row/choice?'
-        else:
-            message = 'Are you sure you want to remove all of the selected rows/choices?'
-
-        if the_range.bottomRow() == 0:
-            return
-
-        msgbox = QMessageBox()
-        msgbox.setIcon(QMessageBox.Question)
-        msgbox.setText(message)
-        msgbox.setInformativeText('This action cannot be undone (for now)!')
-        msgbox.setStandardButtons(QMessageBox.Cancel | QMessageBox.Yes)
-        msgbox.setDefaultButton(QMessageBox.Yes)
-        cb = QCheckBox('Do not show this again')
-        msgbox.setCheckBox(cb)
-        # TODO: actually make this checkbox do something
-        if msgbox.exec() == QMessageBox.Cancel:
+        bottom_fn = lambda x: x.topRow()
+        top_fn = lambda x: x.bottomRow()
+        the_range = self.delete_row_or_column(bottom_fn, top_fn, 'choice row', 0)
+        if not the_range:
             return
 
         for row in reversed(range(the_range.topRow(), the_range.bottomRow() + 1)):
             if row != 0:  # If weights row selected, do nothing silently
                 self.matrix_widget.removeRow(row)
                 self.matrix.df.drop(self.matrix.df.index[row], inplace=True)
+
+    def delete_column(self):
+        percentage_col = self.matrix_widget.columnCount() - 1
+        bottom_fn = lambda x: x.leftColumn()
+        top_fn = lambda x: x.rightColumn()
+        the_range = self.delete_row_or_column(
+            bottom_fn, top_fn, 'criteria column', percentage_col
+        )
+        if not the_range:
+            return
+
+        for col in reversed(range(the_range.leftColumn(), the_range.rightColumn() + 1)):
+            if col != self.matrix_widget.columnCount() - 1:
+                self.matrix_widget.removeColumn(col)
+                self.matrix.df.drop(
+                    self.matrix.df.columns[col], axis='columns', inplace=True
+                )
 
 
     ## Sub-routines
@@ -197,6 +185,43 @@ class MatrixTabMixin:
             item = QTableWidgetItem(str(round(value, 2)) + '%')
             if (last_col := self.matrix_widget.columnCount()):
                 self.set_item_uneditable(item, row, last_col - 1)
+
+    def delete_row_or_column(self, bottom_fn, top_fn, name, condition):
+        selected_ranges = self.matrix_widget.selectedRanges()
+
+        if len(selected_ranges) == 0:
+            return QMessageBox.warning(
+                None, 'Nothing selected', 'No rows were selected',
+                QMessageBox.Ok, QMessageBox.Ok
+            )
+
+        if len(selected_ranges) > 1:
+            return QMessageBox.warning(
+                None, 'Invalid selection', 'Multiple selection ranges are not allowed',
+                QMessageBox.Ok, QMessageBox.Ok
+            )
+
+        the_range = selected_ranges[0]
+        if top_fn(the_range) == condition and bottom_fn(the_range) == condition:
+            return
+
+        if bottom_fn(the_range) == top_fn(the_range):
+            message = f'Are you sure you want to remove this {name}?'
+        else:
+            message = f'Are you sure you want to remove all of the selected {name}s?'
+
+        msgbox = QMessageBox()
+        msgbox.setIcon(QMessageBox.Question)
+        msgbox.setText(message)
+        msgbox.setInformativeText('This action cannot be undone (for now)!')
+        msgbox.setStandardButtons(QMessageBox.Cancel | QMessageBox.Yes)
+        msgbox.setDefaultButton(QMessageBox.Yes)
+        cb = QCheckBox('Do not show this again')
+        msgbox.setCheckBox(cb)
+        # TODO: actually make this checkbox do something
+        if msgbox.exec() == QMessageBox.Cancel:
+            return
+        return the_range
 
 
 class DataTabMixin:
