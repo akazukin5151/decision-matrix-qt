@@ -144,7 +144,7 @@ class MatrixTabMixin:
             return
 
         for col in reversed(range(the_range.leftColumn(), the_range.rightColumn() + 1)):
-            if col != self.matrix_widget.columnCount() - 1:
+            if col != percentage_col:
                 self.matrix_widget.removeColumn(col)
                 self.matrix.df.drop(
                     self.matrix.df.columns[col], axis='columns', inplace=True
