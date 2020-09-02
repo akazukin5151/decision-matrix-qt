@@ -271,11 +271,23 @@ class ContinuousCriteriaPage(EnableNextOnBackMixin, QWizardPage):
         if self.list_widget.count() == 0:
             self.delete_button.setDisabled(True)
             self.parent_wizard.next_button.setDisabled(True)
-        # TODO: remove column
 
     def matrix_remove(self, index):
         idx = self.parent_wizard.main_parent.matrix.continuous_criteria.pop(index)
         self.parent_wizard.main_parent.matrix.df.drop(idx, axis='columns', inplace=True)
+        self.parent_wizard.main_parent.matrix_widget.removeColumn(index)
+
+        # Delete everything inside that criterion's tab and the tab
+        (self.parent_wizard.main_parent.inner_tab_widget
+            .widget(index).layout().deleteLater())
+        self.parent_wizard.main_parent.inner_tab_widget.removeTab(index)
+
+        # Remove the section in the data tab
+        groupbox = self.parent_wizard.main_parent.data_grid.takeAt(index).widget()
+        while (child := groupbox.layout().takeAt(0)):
+            del child
+        self.parent_wizard.main_parent.data_grid.removeWidget(groupbox)
+        del groupbox
 
     def nextId(self):
         if self.yes.isChecked():
