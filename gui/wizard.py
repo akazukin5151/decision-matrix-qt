@@ -251,6 +251,14 @@ class ContinuousCriteriaPage(EnableNextOnBackMixin, QWizardPage):
         grid.addWidget(self.delete_button, 3, 1, Qt.AlignTop)
         self.setLayout(grid)
 
+    def initializePage(self):
+        for criterion in self.parent_wizard.main_parent.matrix.continuous_criteria:
+            self.list_widget.addItem(QListWidgetItem(criterion))
+
+        if self.list_widget.count() != 0:
+            self.yes.setChecked(True)
+            self.parent_wizard.next_button.setEnabled(True)
+
     def toggled(self, checked: bool):
         if checked:
             self.line_edit.setEnabled(True)
