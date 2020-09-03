@@ -297,10 +297,10 @@ class ContinuousCriteriaPage(EnableNextOnBackMixin, QWizardPage):
         self.delete_button.setEnabled(True)
 
         self.parent_wizard.main_parent.line_edit_data_tab.setText(name)
-        self.parent_wizard.main_parent.add_continuous_criteria()
         self.parent_wizard.main_parent.matrix.add_continuous_criterion(
             name, weight=float('nan')
         )
+        self.parent_wizard.main_parent.add_continuous_criteria()
 
     def delete_item(self):
         # Completely copied (except list -> list_widget)
@@ -677,11 +677,15 @@ class DataPage(EnableNextOnBackMixin, AbstractDataLayout, QWizardPage):
         if self.has_score:
             self.parent_wizard.next_button.setEnabled(True)
         super().value_changed(criterion, index, value)
+        (self.parent_wizard.main_parent
+            .data_tab_page.value_spin_boxes[criterion][index].setValue(value))
 
     def score_changed(self, criterion, index, score):
         if self.has_value:
             self.parent_wizard.next_button.setEnabled(True)
         super().score_changed(criterion, index, score)
+        (self.parent_wizard.main_parent
+            .data_tab_page.score_spin_boxes[criterion][index].setValue(score))
 
     def nextId(self):
         # If the only criteria that exist is continuous, skip the ratings page

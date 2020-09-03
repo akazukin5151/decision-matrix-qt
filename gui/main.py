@@ -33,6 +33,13 @@ class DataTab(AbstractDataLayout):
         super().__init__(grid)
         self.matrix = matrix
 
+    def initializePage(self, criteria):
+        criteria_filtered = [
+            x for x in criteria
+            if x not in self.rows_for_each_criteria.keys()
+        ]
+        super().initializePage(criteria_filtered)
+
 
 class MatrixTabMixin:
     # Tab 1
@@ -231,6 +238,10 @@ class MatrixTabMixin:
 
 
 class DataTabMixin:
+    def __init__(self):
+        # This is the only init function in any mixin class
+        self.data_tab_page = None
+
     # Tab 2
     ## Callbacks
     def add_continuous_criteria(self):
@@ -238,10 +249,9 @@ class DataTabMixin:
             return
 
         # Add to data tab
-        page = DataTab(self.data_grid, self.matrix)
-        page.initializePage([criterion_name])
-
-        #self.matrix.add_continuous_criterion(criterion_name, weight=float('nan'))
+        if not self.data_tab_page:
+            self.data_tab_page = DataTab(self.data_grid, self.matrix)
+        self.data_tab_page.initializePage(self.matrix.continuous_criteria)
 
         # Add criteria to the main tab
         self.lineEdit.setText(criterion_name)
@@ -255,7 +265,6 @@ class DataTabMixin:
         self.line_edit_data_tab.setFocus()
 
 # TODO: update calculated percentages from dataframe to table in tab 1
-# TODO: sync with data tab in wizard
 
 
 class Ui_MainWindow(SetupUIMixin, MatrixTabMixin, DataTabMixin):
