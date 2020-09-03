@@ -380,8 +380,8 @@ class WeightsPage(AbstractSliderPage):
 
     def initializePage(self):
         super().initializePage()
-        it = enumerate(self.parent_wizard.main_parent.matrix.df.loc['Weight'][:-1])
-        for idx, value in it:
+        for idx, criterion in enumerate(self.collection()):
+            value = self.parent_wizard.main_parent.matrix.df.loc['Weight', criterion]
             if str(value) != 'nan':
                 self.spin_boxes[idx].setValue(value)
 
