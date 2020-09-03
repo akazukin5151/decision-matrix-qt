@@ -251,6 +251,10 @@ class DataTabMixin:
         # Add to data tab
         if not self.data_tab_page:
             self.data_tab_page = DataTab(self.data_grid, self.matrix)
+
+        if criterion_name not in self.matrix.continuous_criteria:
+            self.matrix.continuous_criteria.append(criterion_name)
+
         self.data_tab_page.initializePage(self.matrix.continuous_criteria)
 
         # Add criteria to the main tab
