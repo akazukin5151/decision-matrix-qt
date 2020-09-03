@@ -29,9 +29,10 @@ def safe_float(string, fallback: 'T' = None) -> 'Union[float, T]':
 
 
 class DataTab(AbstractDataLayout):
-    def __init__(self, grid, matrix):
-        super().__init__(grid)
-        self.matrix = matrix
+    def __init__(self, other):
+        super().__init__(other.data_grid)
+        self.matrix = other.matrix
+        self.tab_1 = other.matrix_tab
 
     def initializePage(self, criteria):
         criteria_filtered = [
@@ -250,7 +251,7 @@ class DataTabMixin:
 
         # Add to data tab
         if not self.data_tab_page:
-            self.data_tab_page = DataTab(self.data_grid, self.matrix)
+            self.data_tab_page = DataTab(self)
 
         if criterion_name not in self.matrix.continuous_criteria:
             self.matrix.continuous_criteria.append(criterion_name)
@@ -267,8 +268,6 @@ class DataTabMixin:
 
         self.line_edit_data_tab.clear()
         self.line_edit_data_tab.setFocus()
-
-# TODO: update calculated percentages from dataframe to table in tab 1
 
 
 class Ui_MainWindow(SetupUIMixin, MatrixTabMixin, DataTabMixin):

@@ -514,7 +514,10 @@ class RatingPage(EnableNextOnBackMixin, QWizardPage):
 
 class AbstractDataLayout:
     def __init__(self, grid):
-        self.matrix: 'pd.DataFrame'  # Subclasses must provide this attribute
+        # Subclasses must provide these attributes
+        self.matrix: 'pd.DataFrame'
+        self.tab_1: 'QWidget'
+
         self.grid = grid
         self.has_value = False
         self.has_score = False
@@ -592,6 +595,11 @@ class AbstractDataLayout:
             self.matrix.value_score_df.loc[index, criterion] = value
             self.matrix.value_score_df.loc[index, criterion + '_score'] = score
 
+        # TODO: update calculated percentages from dataframe to table in tab 1
+        # Need the actual data first, not the value-score pairs
+        self.matrix._calculate_percentage()
+        print(self.matrix)
+
 
     def add_row(self, criterion, deleteable=True):
         # The last row for this criterion
@@ -667,6 +675,7 @@ class DataPage(EnableNextOnBackMixin, AbstractDataLayout, QWizardPage):
         AbstractDataLayout.__init__(self, QGridLayout(self))
         self.parent_wizard = weakref.proxy(parent)
         self.matrix = self.parent_wizard.main_parent.matrix
+        self.tab_1 = self.parent_wizard.main_parent.matrix_tab
         self.setTitle('Data')
 
     def initializePage(self):
