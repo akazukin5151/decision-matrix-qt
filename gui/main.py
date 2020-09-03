@@ -241,7 +241,7 @@ class DataTabMixin:
         page = DataTab(self.data_grid, self.matrix)
         page.initializePage([criterion_name])
 
-        self.matrix.add_continuous_criterion(criterion_name, weight=float('nan'))
+        #self.matrix.add_continuous_criterion(criterion_name, weight=float('nan'))
 
         # Add criteria to the main tab
         self.lineEdit.setText(criterion_name)
