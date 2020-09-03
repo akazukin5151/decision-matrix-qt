@@ -86,22 +86,27 @@ class EnableNextOnBackMixin:
 class WelcomePage(QWizardPage):
     def __init__(self, parent):
         super(WelcomePage, self).__init__(parent)
+        self.parent_wizard = weakref.proxy(parent)
         self.setTitle('Welcome')
 
         basic_radio = QRadioButton('&Basic')
         basic_radio.setChecked(True)
-        advanced_radio = QRadioButton('&Advanced')
+        self.advanced_radio = QRadioButton('&Advanced')
 
         group = QButtonGroup(self)
         group.addButton(basic_radio)
-        group.addButton(advanced_radio)
+        group.addButton(self.advanced_radio)
 
         grid = QGridLayout(self)
         grid.addWidget(basic_radio, 0, 0)
-        grid.addWidget(advanced_radio, 1, 0)
+        grid.addWidget(self.advanced_radio, 1, 0)
 
         self.registerField('basic', basic_radio)
         self.setLayout(grid)
+
+    def initializePage(self):
+        if self.parent_wizard.main_parent.matrix.continuous_criteria:
+            self.advanced_radio.setChecked(True)
 
 
 class AbstractMultiInputPage(EnableNextOnBackMixin, QWizardPage):
