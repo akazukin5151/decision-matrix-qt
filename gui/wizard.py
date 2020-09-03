@@ -372,10 +372,22 @@ class AbstractSliderPage(EnableNextOnBackMixin, QWizardPage):
 class WeightsPage(AbstractSliderPage):
     def __init__(self, parent):
         super().__init__(parent)
-        self.collection = lambda: self.parent_wizard.main_parent.matrix.df.columns
+        self.collection = (
+            lambda: filter(
+                lambda x: x != 'Percentage',
+                self.parent_wizard.main_parent.matrix.df.columns
+            )
+        )
         self.setTitle('Weights')
         # Assign weights to your criteria
         # Rate their relative importance
+
+    def initializePage(self):
+        super().initializePage()
+        it = enumerate(self.parent_wizard.main_parent.matrix.df.loc['Weight'][:-1])
+        for idx, value in it:
+            if str(value) != 'nan':
+                self.spin_boxes[idx].setValue(value)
 
     def matrix_action(self, index, value):
         self.parent_wizard.main_parent.matrix.df.iloc[0, index] = value
@@ -689,5 +701,6 @@ class WizardMixin:
         self.wizard.show()
 
     def rejected(self):
-        self.matrix = Matrix()
-        print(self.matrix)
+        #self.matrix = Matrix()
+        #print(self.matrix)
+        pass
