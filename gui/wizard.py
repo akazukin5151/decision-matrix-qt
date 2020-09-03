@@ -682,6 +682,15 @@ class DataPage(EnableNextOnBackMixin, AbstractDataLayout, QWizardPage):
             self.parent_wizard.next_button.setEnabled(True)
         super().score_changed(criterion, index, score)
 
+    def nextId(self):
+        # If the only criteria that exist is continuous, skip the ratings page
+        if (
+            not list(self.parent_wizard.main_parent.matrix.criteria)
+            and self.parent_wizard.main_parent.matrix.continuous_criteria
+        ):
+            return Page.Conclusion
+        return Page.Ratings
+
 
 class ConclusionPage(QWizardPage):
     def __init__(self, parent):
