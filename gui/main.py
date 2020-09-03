@@ -254,6 +254,9 @@ class DataTabMixin:
         self.line_edit_data_tab.clear()
         self.line_edit_data_tab.setFocus()
 
+# TODO: update calculated percentages from dataframe to table in tab 1
+# TODO: sync with data tab in wizard
+
 
 class Ui_MainWindow(SetupUIMixin, MatrixTabMixin, DataTabMixin):
     pass

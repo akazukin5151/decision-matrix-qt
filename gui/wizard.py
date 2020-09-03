@@ -718,10 +718,6 @@ class ConclusionPage(QWizardPage):
 
 class WizardMixin:
     def init_wizard(self):
-        if self.matrix.df.shape != (1, 0):
-            print('todo')
-            # TODO: Reflect edits in table to wizard
-
         self.wizard = Wizard(self)
         self.wizard.rejected.connect(self.rejected)
         self.wizard.show()
