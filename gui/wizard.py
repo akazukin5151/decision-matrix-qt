@@ -218,7 +218,7 @@ class CriteriaPage(AbstractMultiInputPage):
         self.parent_wizard.main_parent.matrix_widget.removeColumn(index)
 
     def nextId(self):
-        if self.list.count() > 1:
+        if self.list.count() >= 1:
             return Page.Weights
         # Else, advanced mode is on
         return Page.Continuous
@@ -369,6 +369,11 @@ class AbstractSliderPage(EnableNextOnBackMixin, QWizardPage):
 
         self.fix_tab_order()
 
+        for idx, criterion in enumerate(self.collection()):
+            value = self.parent_wizard.main_parent.matrix.df.loc['Weight', criterion]
+            if str(value) != 'nan':
+                self.spin_boxes[idx].setValue(value)
+
     def fix_tab_order(self):
         for box1, box2 in zip(self.spin_boxes, self.spin_boxes[1:]):
             self.setTabOrder(box1, box2)
@@ -400,13 +405,6 @@ class WeightsPage(AbstractSliderPage):
         self.setTitle('Weights')
         # Assign weights to your criteria
         # Rate their relative importance
-
-    def initializePage(self):
-        super().initializePage()
-        for idx, criterion in enumerate(self.collection()):
-            value = self.parent_wizard.main_parent.matrix.df.loc['Weight', criterion]
-            if str(value) != 'nan':
-                self.spin_boxes[idx].setValue(value)
 
     def matrix_action(self, index, value):
         self.parent_wizard.main_parent.matrix.df.iloc[0, index] = value
