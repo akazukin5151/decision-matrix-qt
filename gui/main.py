@@ -237,37 +237,10 @@ class DataTabMixin:
         if not (criterion_name := self.line_edit_data_tab.text()):
             return
 
-        # Add table inside inner tab
-        table = self.add_table(tab=None)
-        table = self.setup_table(table)
-        table.setColumnCount(2)
+        # Add to data tab
+        page = DataTab(self.data_grid, self.matrix)
+        page.initializePage([criterion_name])
 
-        # Add the first column
-        empty = QTableWidgetItem()
-        table.setHorizontalHeaderItem(0, empty)
-        last = table.horizontalHeaderItem(0)
-        last.setText(criterion_name)
-
-        # Add the second column
-        empty = QTableWidgetItem()
-        table.setHorizontalHeaderItem(1, empty)
-        last = table.horizontalHeaderItem(1)
-        last.setText(criterion_name + '_score')
-
-        cb = partial(self.value_score_tab_cell_changed, table)
-        table.cellChanged["int", "int"].connect(cb)
-
-        # Add new tab
-        new_tab = QWidget()
-        self.inner_tab_widget.addTab(new_tab, criterion_name)
-        # Add grid layout for the tab
-        new_layout = QGridLayout(new_tab)
-        # Put table in another tab
-        new_layout.addWidget(table)
-        # Switch to the new tab
-        self.inner_tab_widget.setCurrentIndex(self.inner_tab_widget.currentIndex() + 1)
-
-        self.line_edit_data_tab.clear()
         self.matrix.add_continuous_criterion(criterion_name, weight=float('nan'))
 
         # Add criteria to the main tab
@@ -278,65 +251,8 @@ class DataTabMixin:
         for row in range(1, self.matrix_widget.rowCount()):
             self.set_cell_uneditable(row, col)
 
-        # Add to data tab
-        if type(self.data_grid.itemAt(0).widget()) == QLabel:
-            self.data_grid.takeAt(0).widget().deleteLater()
-
-        page = DataTab(self.data_grid, self.matrix)
-        page.initializePage([criterion_name])
-
+        self.line_edit_data_tab.clear()
         self.line_edit_data_tab.setFocus()
-
-    def value_score_tab_cell_changed(self, table, row, column):
-        value = table.item(row, 0)
-        score = table.item(row, 1)
-        if not value or not score:
-            return
-
-        self.remove_last_row_if_last_two_empty(table)
-
-        criterion = table.horizontalHeaderItem(0).text()
-        value_f = safe_float(value.text(), np.nan)
-        score_f = safe_float(score.text(), np.nan)
-
-        # Row removed
-        if value.text() == '' and score.text() == '':
-            self.matrix.remove_criterion_value_to_score(row)
-            return
-
-        if len(self.matrix.value_score_df.columns) == 0:
-            self.matrix.criterion_value_to_score(criterion, {value_f: score_f})
-        else:
-            # Think the API must support modifications by index
-            # to avoid this.
-            self.matrix.value_score_df.loc[row, criterion] = value_f
-            self.matrix.value_score_df.loc[row, criterion + '_score'] = score_f
-
-        # Add new row if both cells in the last row is full
-        last_value = table.item(table.rowCount() - 1, 0)
-        last_score = table.item(table.rowCount() - 1, 1)
-        if last_value and last_score and last_value.text() != '' and last_score.text() != '':
-            current_row_count = table.rowCount()
-            table.setRowCount(current_row_count + 1)
-            table.setVerticalHeaderItem(current_row_count, QTableWidgetItem())
-
-    ## Subroutines
-    def remove_last_row_if_last_two_empty(self, table):
-        if table.rowCount() < 2:
-            return
-
-        last_value = table.item(table.rowCount() - 1, 0)
-        last_score = table.item(table.rowCount() - 1, 1)
-        second_last_value = table.item(table.rowCount() - 2, 0)
-        second_last_score = table.item(table.rowCount() - 2, 1)
-        # An empty cell can either be None or its text method returning ''
-        if (
-            (not last_value or last_value.text() == '')
-            and (not last_score or last_score.text() == '')
-            and (not second_last_value or second_last_value.text() == '')
-            and (not second_last_score or second_last_score.text() == '')
-        ):
-            table.setRowCount(table.rowCount() - 1)
 
 
 class Ui_MainWindow(SetupUIMixin, MatrixTabMixin, DataTabMixin):

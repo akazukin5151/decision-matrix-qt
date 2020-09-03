@@ -14,6 +14,8 @@ from PySide2.QtWidgets import (
     QMenuBar,
     QAction,
     QMenu,
+    QVBoxLayout,
+    QHBoxLayout,
 )
 
 from gui.wizard import WizardMixin
@@ -77,10 +79,6 @@ class SetupUIMixin(WizardMixin):
         # For data tab only
         self.add_criterion_button()
         self.add_input_bar_data_tab()
-        self.add_inner_tab()
-        self.add_data_tab_grid()
-
-        # For actual data tab only
         self.add_data()
 
         self.set_tab_key_order()
@@ -165,14 +163,9 @@ class SetupUIMixin(WizardMixin):
     def add_master_tabs(self):
         self.master_tab_widget = QTabWidget(self.centralwidget)
         self.matrix_tab = QWidget()
-        self.continuous_criteria_tab = QWidget()
         self.data_tab = QWidget()
         self.master_tab_widget.addTab(self.matrix_tab, "Matrix")
-        self.master_tab_widget.addTab(self.continuous_criteria_tab, "Continuous criteria")
-        self.master_tab_widget.addTab(self.data_tab, "Data")
-
-    def add_inner_tab(self):
-        self.inner_tab_widget = QTabWidget(self.continuous_criteria_tab)
+        self.master_tab_widget.addTab(self.data_tab, "Continuous criteria")
 
     def add_master_grid(self):
         self.app_grid_layout = QGridLayout(self.centralwidget)
@@ -185,20 +178,23 @@ class SetupUIMixin(WizardMixin):
         self.grid_layout.addWidget(self.pushButton, 0, 2, 1, 1)
         self.grid_layout.addWidget(self.matrix_widget, 1, 0, 1, 3)
 
-    def add_data_tab_grid(self):
+    def add_data(self):
+        top_layout = QHBoxLayout()
         label = QLabel('Continuous criterion')
-        self.continuous_criteria_tab_grid_layout = QGridLayout(self.continuous_criteria_tab)
-        self.continuous_criteria_tab_grid_layout.addWidget(label, 0, 0, 1, 1)
-        self.continuous_criteria_tab_grid_layout.addWidget(self.line_edit_data_tab, 0, 1, 1, 1)
-        self.continuous_criteria_tab_grid_layout.addWidget(self.criterion_button, 0, 2, 1, 1)
-        self.continuous_criteria_tab_grid_layout.addWidget(self.inner_tab_widget, 1, 0, 1, 3)
+        top_layout.addWidget(label)
+        top_layout.addWidget(self.line_edit_data_tab)
+        top_layout.addWidget(self.criterion_button)
+
+        # TODO: make this a scroll area
+        self.data_grid = QVBoxLayout(self.data_tab)
+        self.data_grid.addLayout(top_layout)
 
     def add_input_bar(self):
         self.lineEdit = QLineEdit(self.matrix_tab)
         self.lineEdit.returnPressed.connect(self.add_row)
 
     def add_input_bar_data_tab(self):
-        self.line_edit_data_tab = QLineEdit(self.continuous_criteria_tab)
+        self.line_edit_data_tab = QLineEdit(self.data_tab)
         self.line_edit_data_tab.returnPressed.connect(self.add_continuous_criteria)
 
     def add_enter_button(self):
@@ -242,7 +238,3 @@ class SetupUIMixin(WizardMixin):
         tableWidget.setVerticalHeaderItem(0, QTableWidgetItem())
         return tableWidget
 
-    def add_data(self):
-        self.data_grid = QGridLayout(self.data_tab)
-        label = QLabel('There are no continuous criteria yet, add one in the second tab')
-        self.data_grid.addWidget(label)
