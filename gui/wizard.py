@@ -169,6 +169,11 @@ class ChoicesPage(AbstractMultiInputPage):
         # Add the choices
         # What are you trying to choose between?
 
+    def initializePage(self):
+        for choice in self.parent_wizard.main_parent.matrix.df.index[1:]:
+            self.list.addItem(QListWidgetItem(choice))
+        super().initializePage()
+
     def matrix_add(self, name):
         self.parent_wizard.main_parent.lineEdit.setText(name)
         self.parent_wizard.main_parent.add_row()
@@ -187,6 +192,12 @@ class CriteriaPage(AbstractMultiInputPage):
         self.label.setText('Criterion name')
         # Add the criteria
         # What characteristics does the choices have that matters?
+
+    def initializePage(self):
+        for criterion in self.parent_wizard.main_parent.matrix.df.columns:
+            if criterion != 'Percentage':
+                self.list.addItem(QListWidgetItem(criterion))
+        super().initializePage()
 
     def matrix_add(self, name):
         self.parent_wizard.main_parent.matrix.add_criterion(name, weight=np.nan)
