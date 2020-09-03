@@ -201,7 +201,11 @@ class CriteriaPage(AbstractMultiInputPage):
     def initializePage(self):
         for criterion in self.parent_wizard.main_parent.matrix.criteria:
             self.list.addItem(QListWidgetItem(criterion))
+
         super().initializePage()
+
+        if self.parent_wizard.main_parent.matrix.continuous_criteria:
+            self.parent_wizard.next_button.setEnabled(True)
 
     def matrix_add(self, name):
         self.parent_wizard.main_parent.matrix.add_criterion(name, weight=np.nan)
@@ -212,6 +216,12 @@ class CriteriaPage(AbstractMultiInputPage):
         idx = self.parent_wizard.main_parent.matrix.df.columns[index]
         self.parent_wizard.main_parent.matrix.df.drop(idx, axis='columns', inplace=True)
         self.parent_wizard.main_parent.matrix_widget.removeColumn(index)
+
+    def nextId(self):
+        if self.list.count() > 1:
+            return Page.Weights
+        # Else, advanced mode is on
+        return Page.Continuous
 
 
 class ContinuousCriteriaPage(EnableNextOnBackMixin, QWizardPage):
