@@ -194,9 +194,8 @@ class CriteriaPage(AbstractMultiInputPage):
         # What characteristics does the choices have that matters?
 
     def initializePage(self):
-        for criterion in self.parent_wizard.main_parent.matrix.df.columns:
-            if criterion != 'Percentage':
-                self.list.addItem(QListWidgetItem(criterion))
+        for criterion in self.parent_wizard.main_parent.matrix.criteria:
+            self.list.addItem(QListWidgetItem(criterion))
         super().initializePage()
 
     def matrix_add(self, name):
@@ -373,10 +372,7 @@ class WeightsPage(AbstractSliderPage):
     def __init__(self, parent):
         super().__init__(parent)
         self.collection = (
-            lambda: filter(
-                lambda x: x != 'Percentage',
-                self.parent_wizard.main_parent.matrix.df.columns
-            )
+            lambda: self.parent_wizard.main_parent.matrix.criteria
         )
         self.setTitle('Weights')
         # Assign weights to your criteria
