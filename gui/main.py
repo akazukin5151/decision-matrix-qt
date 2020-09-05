@@ -10,6 +10,7 @@ from PySide2.QtWidgets import (
     QLabel,
     QMessageBox,
     QCheckBox,
+    QGroupBox,
 )
 
 from gui.setup import SetupUIMixin
@@ -86,10 +87,15 @@ class MatrixTabMixin:
         item = self.matrix_widget.verticalHeaderItem(current_row_count)
         item.setText(new_row_name)
 
-        self.lineEdit.clear()
-        self.lineEdit.setFocus()
         self.set_last_column_uneditable()
         self.set_continuous_cells_uneditable()
+        self.lineEdit.clear()
+        self.lineEdit.setFocus()
+
+        # Add to data tab
+        if type(self.data_grid.itemAt(0).widget()) == QLabel:
+            self.data_grid.takeAt(0).widget().deleteLater()
+        self.data_grid.addWidget(QGroupBox(new_row_name))
 
         self.matrix.add_choices(new_row_name)
 
@@ -270,7 +276,7 @@ class ValueScoreTabMixin:
 
         # Add to data tab
         if self.data_grid.count() == 1:
-            self.data_grid.takeAt(0).widget().deleteLater()
+            return
 
 
 class Ui_MainWindow(SetupUIMixin, MatrixTabMixin, ValueScoreTabMixin):
