@@ -266,7 +266,7 @@ class ValueScoreTabMixin:
         # This is the only init function in any mixin class
         self.cc_tab_page = None
         # Data tab stuff
-        self.data_tab_page = DataTab()
+        self.data_tab_page = DataTab(self)
         self.data_tab_groupboxes = {}  # For add_row in the other mixin
         self.sliders = []
         self.spin_boxes = []
@@ -311,9 +311,10 @@ class ValueScoreTabMixin:
 
 
 class DataTab:
-    def __init__(self):
+    def __init__(self, parent):
         self.sliders = {}
         self.spin_boxes = {}
+        self.parent = parent
 
     def initializePage(self, grid, choice, name):
         grid.addWidget(QLabel(str(name)), 0)
@@ -354,7 +355,12 @@ class DataTab:
             criterion: spin_box.value()
             for criterion, spin_box in self.spin_boxes[choice].items()
         })
-        print(self.matrix)
+        #print(self.matrix)
+        row = self.matrix.df.index.get_loc(choice)
+        column = self.matrix.df.columns.get_loc(_criterion)
+        item = QTableWidgetItem(str(self.matrix.df.loc[choice, _criterion]))
+        self.parent.matrix_widget.setItem(row, column, item)
+        self.parent.max_total_changed(column)
 
 
 class Ui_MainWindow(SetupUIMixin, MatrixTabMixin, ValueScoreTabMixin):
