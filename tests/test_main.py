@@ -168,14 +168,14 @@ def test_add_continuous_criteria(qtbot):
     MainWindow.show()
 
     ui.master_tab_widget.setCurrentIndex(1)
-    qtbot.keyClicks(ui.line_edit_data_tab, 'price')
-    assert ui.line_edit_data_tab.text() == 'price'
+    qtbot.keyClicks(ui.line_edit_cc_tab, 'price')
+    assert ui.line_edit_cc_tab.text() == 'price'
 
-    qtbot.keyClick(ui.line_edit_data_tab, Qt.Key_Enter)
-    assert ui.line_edit_data_tab.text() == ''
+    qtbot.keyClick(ui.line_edit_cc_tab, Qt.Key_Enter)
+    assert ui.line_edit_cc_tab.text() == ''
     assert 'price' in ui.matrix.continuous_criteria
 
-    qtbot.keyClicks(ui.line_edit_data_tab, 'size')
+    qtbot.keyClicks(ui.line_edit_cc_tab, 'size')
     qtbot.mouseClick(ui.criterion_button, Qt.LeftButton)  # Button works as well
     assert 'size' in ui.matrix.continuous_criteria
 

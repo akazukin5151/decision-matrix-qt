@@ -40,7 +40,7 @@ class Page(IntEnum):
     Weights = auto()
     Continuous = auto()
     ContinuousWeights = auto()
-    Data = auto()
+    ValueScores = auto()
     Ratings = auto()
     Conclusion = auto()
 
@@ -73,7 +73,7 @@ class Wizard(QWizard):
         self.setPage(Page.Weights, WeightsPage(self))
         self.setPage(Page.Continuous, ContinuousCriteriaPage(self))
         self.setPage(Page.ContinuousWeights, ContinuousCriteriaWeightsPage(self))
-        self.setPage(Page.Data, DataPage(self))
+        self.setPage(Page.ValueScores, ValueScorePage(self))
         self.setPage(Page.Ratings, RatingPage(self))
         self.setPage(Page.Conclusion, ConclusionPage(self))
 
@@ -296,7 +296,7 @@ class ContinuousCriteriaPage(EnableNextOnBackMixin, QWizardPage):
         self.parent_wizard.next_button.setEnabled(True)
         self.delete_button.setEnabled(True)
 
-        self.parent_wizard.main_parent.line_edit_data_tab.setText(name)
+        self.parent_wizard.main_parent.line_edit_cc_tab.setText(name)
         self.parent_wizard.main_parent.matrix.add_continuous_criterion(
             name, weight=float('nan')
         )
@@ -318,10 +318,10 @@ class ContinuousCriteriaPage(EnableNextOnBackMixin, QWizardPage):
         self.parent_wizard.main_parent.matrix_widget.removeColumn(index)
 
         # FIXME: deleting item then adding it again doesn't add it in the tab
-        # Remove the section in the data tab
-        groupbox = self.parent_wizard.main_parent.data_grid.takeAt(index + 1).widget()
+        # Remove the section in the value-score tab
+        groupbox = self.parent_wizard.main_parent.cc_grid.takeAt(index + 1).widget()
         clear_layout(groupbox.layout())
-        self.parent_wizard.main_parent.data_grid.removeWidget(groupbox)
+        self.parent_wizard.main_parent.cc_grid.removeWidget(groupbox)
         groupbox.deleteLater()
 
     def nextId(self):
@@ -508,7 +508,7 @@ class RatingPage(EnableNextOnBackMixin, QWizardPage):
         self.parent_wizard.main_parent.matrix_widget.setItem(row, col, item)
 
 
-class AbstractDataLayout:
+class AbstractValueScoreLayout:
     def __init__(self, grid):
         # Subclasses must provide these attributes
         self.matrix: 'pd.DataFrame'
@@ -665,14 +665,14 @@ class AbstractDataLayout:
         self.vertical_layouts[criterion].removeItem(form)
 
 
-class DataPage(EnableNextOnBackMixin, AbstractDataLayout, QWizardPage):
+class ValueScorePage(EnableNextOnBackMixin, AbstractValueScoreLayout, QWizardPage):
     def __init__(self, parent):
         QWizardPage.__init__(self, parent)
-        AbstractDataLayout.__init__(self, QGridLayout(self))
+        AbstractValueScoreLayout.__init__(self, QGridLayout(self))
         self.parent_wizard = weakref.proxy(parent)
         self.matrix = self.parent_wizard.main_parent.matrix
         self.tab_1 = self.parent_wizard.main_parent.matrix_tab
-        self.setTitle('Data')
+        self.setTitle('Criterion value to scores')
 
     def initializePage(self):
         self.parent_wizard.next_button.setDisabled(True)
@@ -683,14 +683,14 @@ class DataPage(EnableNextOnBackMixin, AbstractDataLayout, QWizardPage):
             self.parent_wizard.next_button.setEnabled(True)
         super().value_changed(criterion, index, value)
         (self.parent_wizard.main_parent
-            .data_tab_page.value_spin_boxes[criterion][index].setValue(value))
+            .cc_tab_page.value_spin_boxes[criterion][index].setValue(value))
 
     def score_changed(self, criterion, index, score):
         if self.has_value:
             self.parent_wizard.next_button.setEnabled(True)
         super().score_changed(criterion, index, score)
         (self.parent_wizard.main_parent
-            .data_tab_page.score_spin_boxes[criterion][index].setValue(score))
+            .cc_tab_page.score_spin_boxes[criterion][index].setValue(score))
 
     def nextId(self):
         # If the only criteria that exist is continuous, skip the ratings page

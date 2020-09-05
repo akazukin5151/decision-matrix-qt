@@ -76,10 +76,10 @@ class SetupUIMixin(WizardMixin):
         self.add_matrix_tab_grid()
         self.matrix_widget.cellChanged["int", "int"].connect(self.cell_changed)
 
-        # For data tab only
+        # For continuous criteria tab only
         self.add_criterion_button()
-        self.add_input_bar_data_tab()
-        self.add_data()
+        self.add_input_bar_cc_tab()
+        self.add_cc_tab_grid()
 
         self.set_tab_key_order()
         QMetaObject.connectSlotsByName(MainWindow)
@@ -163,9 +163,9 @@ class SetupUIMixin(WizardMixin):
     def add_master_tabs(self):
         self.master_tab_widget = QTabWidget(self.centralwidget)
         self.matrix_tab = QWidget()
-        self.data_tab = QWidget()
+        self.cc_tab = QWidget()
         self.master_tab_widget.addTab(self.matrix_tab, "Matrix")
-        self.master_tab_widget.addTab(self.data_tab, "Continuous criteria")
+        self.master_tab_widget.addTab(self.cc_tab, "Continuous criteria")
 
     def add_master_grid(self):
         self.app_grid_layout = QGridLayout(self.centralwidget)
@@ -178,24 +178,24 @@ class SetupUIMixin(WizardMixin):
         self.grid_layout.addWidget(self.pushButton, 0, 2, 1, 1)
         self.grid_layout.addWidget(self.matrix_widget, 1, 0, 1, 3)
 
-    def add_data(self):
+    def add_cc_tab_grid(self):
         top_layout = QHBoxLayout()
         label = QLabel('Continuous criterion')
         top_layout.addWidget(label)
-        top_layout.addWidget(self.line_edit_data_tab)
+        top_layout.addWidget(self.line_edit_cc_tab)
         top_layout.addWidget(self.criterion_button)
 
         # TODO: make this a scroll area
-        self.data_grid = QVBoxLayout(self.data_tab)
-        self.data_grid.addLayout(top_layout)
+        self.cc_grid = QVBoxLayout(self.cc_tab)
+        self.cc_grid.addLayout(top_layout)
 
     def add_input_bar(self):
         self.lineEdit = QLineEdit(self.matrix_tab)
         self.lineEdit.returnPressed.connect(self.add_row)
 
-    def add_input_bar_data_tab(self):
-        self.line_edit_data_tab = QLineEdit(self.data_tab)
-        self.line_edit_data_tab.returnPressed.connect(self.add_continuous_criteria)
+    def add_input_bar_cc_tab(self):
+        self.line_edit_cc_tab = QLineEdit(self.cc_tab)
+        self.line_edit_cc_tab.returnPressed.connect(self.add_continuous_criteria)
 
     def add_enter_button(self):
         self.pushButton = QPushButton(self.matrix_tab)
@@ -218,7 +218,7 @@ class SetupUIMixin(WizardMixin):
         QWidget.setTabOrder(self.lineEdit, self.pushButton)
         QWidget.setTabOrder(self.pushButton, self.matrix_widget)
 
-        QWidget.setTabOrder(self.line_edit_data_tab, self.criterion_button)
+        QWidget.setTabOrder(self.line_edit_cc_tab, self.criterion_button)
 
     def add_table(self, tab):
         tableWidget = QTableWidget(tab)

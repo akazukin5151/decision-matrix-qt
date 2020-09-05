@@ -361,7 +361,7 @@ def test_continuous_criteria_weights(qtbot):
     assert w.next_button.isEnabled() is True
 
 
-def test_data_wizard_page(qtbot):
+def test_value_score_wizard_page(qtbot):
     # Setup
     MainWindow = QMainWindow()
     ui = Ui_MainWindow()
@@ -396,7 +396,7 @@ def test_data_wizard_page(qtbot):
     w.currentPage().spin_boxes[0].setValue(4)
     w.currentPage().spin_boxes[1].setValue(7)
     qtbot.mouseClick(w.next_button, Qt.LeftButton)
-    assert type(w.currentPage()) == wizard.DataPage
+    assert type(w.currentPage()) == wizard.ValueScorePage
 
     # Test pages
     number_of_criteria = 2

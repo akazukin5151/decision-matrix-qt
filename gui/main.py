@@ -13,7 +13,7 @@ from PySide2.QtWidgets import (
 )
 
 from gui.setup import SetupUIMixin
-from gui.wizard import AbstractDataLayout
+from gui.wizard import AbstractValueScoreLayout
 
 
 _translate = QCoreApplication.translate
@@ -28,9 +28,9 @@ def safe_float(string, fallback: 'T' = None) -> 'Union[float, T]':
         return 0.0
 
 
-class DataTab(AbstractDataLayout):
+class ValueScoreTab(AbstractValueScoreLayout):
     def __init__(self, other):
-        super().__init__(other.data_grid)
+        super().__init__(other.cc_grid)
         self.matrix = other.matrix
         self.tab_1 = other.matrix_tab
 
@@ -238,25 +238,24 @@ class MatrixTabMixin:
         return selected_ranges
 
 
-class DataTabMixin:
+class ValueScoreTabMixin:
     def __init__(self):
         # This is the only init function in any mixin class
-        self.data_tab_page = None
+        self.cc_tab_page = None
 
     # Tab 2
     ## Callbacks
     def add_continuous_criteria(self):
-        if not (criterion_name := self.line_edit_data_tab.text()):
+        if not (criterion_name := self.line_edit_cc_tab.text()):
             return
 
-        # Add to data tab
-        if not self.data_tab_page:
-            self.data_tab_page = DataTab(self)
+        if not self.cc_tab_page:
+            self.cc_tab_page = ValueScoreTab(self)
 
         if criterion_name not in self.matrix.continuous_criteria:
             self.matrix.continuous_criteria.append(criterion_name)
 
-        self.data_tab_page.initializePage(self.matrix.continuous_criteria)
+        self.cc_tab_page.initializePage(self.matrix.continuous_criteria)
 
         # Add criteria to the main tab
         self.lineEdit.setText(criterion_name)
@@ -266,10 +265,10 @@ class DataTabMixin:
         for row in range(1, self.matrix_widget.rowCount()):
             self.set_cell_uneditable(row, col)
 
-        self.line_edit_data_tab.clear()
-        self.line_edit_data_tab.setFocus()
+        self.line_edit_cc_tab.clear()
+        self.line_edit_cc_tab.setFocus()
 
 
-class Ui_MainWindow(SetupUIMixin, MatrixTabMixin, DataTabMixin):
+class Ui_MainWindow(SetupUIMixin, MatrixTabMixin, ValueScoreTabMixin):
     pass
 
