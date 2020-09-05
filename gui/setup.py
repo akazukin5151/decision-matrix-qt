@@ -68,13 +68,10 @@ class SetupUIMixin(WizardMixin):
         self.add_input_bar()
         self.add_enter_button()
         self.add_combo_box()
-        self.matrix_widget = self.add_table(tab=self.matrix_tab)
-        self.matrix_widget = self.setup_table(self.matrix_widget)
-        self.matrix_widget.verticalHeaderItem(0).setText("Weight")
-        self.matrix_widget.horizontalHeaderItem(0).setText("Percentage")
+        self.add_table()
+        self.setup_table()
         self.set_last_column_uneditable()
         self.add_matrix_tab_grid()
-        self.matrix_widget.cellChanged["int", "int"].connect(self.cell_changed)
 
         # For continuous criteria tab only
         self.add_criterion_button()
@@ -176,12 +173,54 @@ class SetupUIMixin(WizardMixin):
         self.app_grid_layout = QGridLayout(self.centralwidget)
         self.app_grid_layout.addWidget(self.master_tab_widget, 0, 0, 1, 1)
 
+    def add_input_bar(self):
+        self.lineEdit = QLineEdit(self.matrix_tab)
+        self.lineEdit.returnPressed.connect(self.add_row)
+
+    def add_enter_button(self):
+        self.pushButton = QPushButton(self.matrix_tab)
+        self.pushButton.setText('Add row')
+        self.pushButton.clicked.connect(self.add_row)
+
+    def add_combo_box(self):
+        self.combo_box = QComboBox(self.matrix_tab)
+        self.combo_box.addItem("New choice")
+        self.combo_box.addItem("New criteria")
+        self.combo_box.currentIndexChanged.connect(self.combo_changed)
+
+    def add_table(self):
+        self.matrix_widget = QTableWidget(self.matrix_tab)
+        self.matrix_widget.setGridStyle(Qt.SolidLine)
+        self.matrix_widget.setCornerButtonEnabled(True)
+        self.matrix_widget.horizontalHeader().setVisible(True)
+        self.matrix_widget.horizontalHeader().setCascadingSectionResizes(False)
+        self.matrix_widget.horizontalHeader().setSortIndicatorShown(False)
+        self.matrix_widget.verticalHeader().setVisible(True)
+        self.matrix_widget.setSortingEnabled(False)
+
+    def setup_table(self):
+        self.matrix_widget.setColumnCount(1)
+        self.matrix_widget.setHorizontalHeaderItem(0, QTableWidgetItem())
+        self.matrix_widget.setRowCount(1)
+        self.matrix_widget.setVerticalHeaderItem(0, QTableWidgetItem())
+        self.matrix_widget.verticalHeaderItem(0).setText("Weight")
+        self.matrix_widget.horizontalHeaderItem(0).setText("Percentage")
+        self.matrix_widget.cellChanged["int", "int"].connect(self.cell_changed)
+
     def add_matrix_tab_grid(self):
         self.grid_layout = QGridLayout(self.matrix_tab)
         self.grid_layout.addWidget(self.combo_box, 0, 0, 1, 1)
         self.grid_layout.addWidget(self.lineEdit, 0, 1, 1, 1)
         self.grid_layout.addWidget(self.pushButton, 0, 2, 1, 1)
         self.grid_layout.addWidget(self.matrix_widget, 1, 0, 1, 3)
+
+    def add_criterion_button(self):
+        self.criterion_button = QPushButton('Add')
+        self.criterion_button.clicked.connect(self.add_continuous_criteria)
+
+    def add_input_bar_cc_tab(self):
+        self.line_edit_cc_tab = QLineEdit(self.cc_tab)
+        self.line_edit_cc_tab.returnPressed.connect(self.add_continuous_criteria)
 
     def add_cc_tab_grid(self):
         top_layout = QHBoxLayout()
@@ -194,28 +233,10 @@ class SetupUIMixin(WizardMixin):
         self.cc_grid = QVBoxLayout(self.cc_tab)
         self.cc_grid.addLayout(top_layout)
 
-    def add_input_bar(self):
-        self.lineEdit = QLineEdit(self.matrix_tab)
-        self.lineEdit.returnPressed.connect(self.add_row)
-
-    def add_input_bar_cc_tab(self):
-        self.line_edit_cc_tab = QLineEdit(self.cc_tab)
-        self.line_edit_cc_tab.returnPressed.connect(self.add_continuous_criteria)
-
-    def add_enter_button(self):
-        self.pushButton = QPushButton(self.matrix_tab)
-        self.pushButton.setText('Add row')
-        self.pushButton.clicked.connect(self.add_row)
-
-    def add_criterion_button(self):
-        self.criterion_button = QPushButton('Add')
-        self.criterion_button.clicked.connect(self.add_continuous_criteria)
-
-    def add_combo_box(self):
-        self.combo_box = QComboBox(self.matrix_tab)
-        self.combo_box.addItem("New choice")
-        self.combo_box.addItem("New criteria")
-        self.combo_box.currentIndexChanged.connect(self.combo_changed)
+    def add_data_label(self):
+        self.data_grid = QGridLayout(self.data_tab)
+        label = QLabel('There are no continuous criteria yet, add one in the second tab')
+        self.data_grid.addWidget(label)
 
     def set_tab_key_order(self):
         QWidget.setTabOrder(self.master_tab_widget, self.combo_box)
@@ -224,27 +245,4 @@ class SetupUIMixin(WizardMixin):
         QWidget.setTabOrder(self.pushButton, self.matrix_widget)
 
         QWidget.setTabOrder(self.line_edit_cc_tab, self.criterion_button)
-
-    def add_data_label(self):
-        self.data_grid = QGridLayout(self.data_tab)
-        label = QLabel('There are no continuous criteria yet, add one in the second tab')
-        self.data_grid.addWidget(label)
-
-    def add_table(self, tab):
-        tableWidget = QTableWidget(tab)
-        tableWidget.setGridStyle(Qt.SolidLine)
-        tableWidget.setCornerButtonEnabled(True)
-        tableWidget.horizontalHeader().setVisible(True)
-        tableWidget.horizontalHeader().setCascadingSectionResizes(False)
-        tableWidget.horizontalHeader().setSortIndicatorShown(False)
-        tableWidget.verticalHeader().setVisible(True)
-        tableWidget.setSortingEnabled(False)
-        return tableWidget
-
-    def setup_table(self, tableWidget):
-        tableWidget.setColumnCount(1)
-        tableWidget.setHorizontalHeaderItem(0, QTableWidgetItem())
-        tableWidget.setRowCount(1)
-        tableWidget.setVerticalHeaderItem(0, QTableWidgetItem())
-        return tableWidget
 
