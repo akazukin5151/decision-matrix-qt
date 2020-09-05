@@ -268,6 +268,10 @@ class ValueScoreTabMixin:
         self.line_edit_cc_tab.clear()
         self.line_edit_cc_tab.setFocus()
 
+        # Add to data tab
+        if type(self.data_grid.itemAt(0).widget()) == QLabel:
+            self.data_grid.takeAt(0).widget().deleteLater()
+
 
 class Ui_MainWindow(SetupUIMixin, MatrixTabMixin, ValueScoreTabMixin):
     pass

@@ -81,6 +81,9 @@ class SetupUIMixin(WizardMixin):
         self.add_input_bar_cc_tab()
         self.add_cc_tab_grid()
 
+        # For data tab only
+        self.add_data_label()
+
         self.set_tab_key_order()
         QMetaObject.connectSlotsByName(MainWindow)
 
@@ -164,8 +167,10 @@ class SetupUIMixin(WizardMixin):
         self.master_tab_widget = QTabWidget(self.centralwidget)
         self.matrix_tab = QWidget()
         self.cc_tab = QWidget()
+        self.data_tab = QWidget()
         self.master_tab_widget.addTab(self.matrix_tab, "Matrix")
         self.master_tab_widget.addTab(self.cc_tab, "Continuous criteria")
+        self.master_tab_widget.addTab(self.data_tab, 'Data')
 
     def add_master_grid(self):
         self.app_grid_layout = QGridLayout(self.centralwidget)
@@ -219,6 +224,11 @@ class SetupUIMixin(WizardMixin):
         QWidget.setTabOrder(self.pushButton, self.matrix_widget)
 
         QWidget.setTabOrder(self.line_edit_cc_tab, self.criterion_button)
+
+    def add_data_label(self):
+        self.data_grid = QGridLayout(self.data_tab)
+        label = QLabel('There are no continuous criteria yet, add one in the second tab')
+        self.data_grid.addWidget(label)
 
     def add_table(self, tab):
         tableWidget = QTableWidget(tab)
