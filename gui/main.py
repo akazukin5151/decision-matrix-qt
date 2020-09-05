@@ -2,7 +2,7 @@ from functools import partial
 
 import numpy as np
 import pandas as pd
-from PySide2.QtCore import QCoreApplication
+from PySide2.QtCore import QCoreApplication, Qt
 from PySide2.QtWidgets import (
     QWidget,
     QGridLayout,
@@ -11,6 +11,10 @@ from PySide2.QtWidgets import (
     QMessageBox,
     QCheckBox,
     QGroupBox,
+    QVBoxLayout,
+    QSpinBox,
+    QSlider,
+    QHBoxLayout,
 )
 
 from gui.setup import SetupUIMixin
@@ -41,6 +45,7 @@ class ValueScoreTab(AbstractValueScoreLayout):
             if x not in self.rows_for_each_criteria.keys()
         ]
         super().initializePage(criteria_filtered)
+
 
 
 class MatrixTabMixin:
@@ -95,7 +100,19 @@ class MatrixTabMixin:
         # Add to data tab
         if type(self.data_grid.itemAt(0).widget()) == QLabel:
             self.data_grid.takeAt(0).widget().deleteLater()
-        self.data_grid.addWidget(QGroupBox(new_row_name))
+
+        groupbox = QGroupBox(new_row_name)
+        QVBoxLayout(groupbox)
+
+        # Copied
+        for criterion_name in self.matrix.continuous_criteria:
+            inner_grid = QHBoxLayout()
+            self.data_tab_page.initializePage(inner_grid, new_row_name, criterion_name)
+            groupbox.layout().addLayout(inner_grid)
+            self.data_grid.addWidget(groupbox)
+
+        self.data_grid.addWidget(groupbox)
+        self.data_tab_groupboxes[new_row_name] = groupbox
 
         self.matrix.add_choices(new_row_name)
 
@@ -248,6 +265,11 @@ class ValueScoreTabMixin:
     def __init__(self):
         # This is the only init function in any mixin class
         self.cc_tab_page = None
+        # Data tab stuff
+        self.data_tab_page = DataTab()
+        self.data_tab_groupboxes = {}  # For add_row in the other mixin
+        self.sliders = []
+        self.spin_boxes = []
 
     # Tab 2
     ## Callbacks
@@ -275,8 +297,57 @@ class ValueScoreTabMixin:
         self.line_edit_cc_tab.setFocus()
 
         # Add to data tab
-        if self.data_grid.count() == 1:
+        if type(self.data_grid.itemAt(0).widget()) == QLabel:
             return
+
+        for choice, groupbox in self.data_tab_groupboxes.items():
+            inner_grid = QHBoxLayout()
+            self.data_tab_page.initializePage(inner_grid, choice, criterion_name)
+            groupbox.layout().addLayout(inner_grid)
+            self.data_grid.addWidget(groupbox)
+
+
+class DataTab:
+    def __init__(self):
+        self.sliders = {}
+        self.spin_boxes = {}
+
+    def initializePage(self, grid, choice, name):
+        grid.addWidget(QLabel(str(name)), 0)
+
+        spin_box = QSpinBox()
+        spin_box.setRange(0, 10)
+        cb = partial(self.spin_box_changed, choice, name)
+        spin_box.valueChanged.connect(cb)
+        if choice not in self.spin_boxes.keys():
+            self.spin_boxes[choice] = {name: spin_box}
+        else:
+            self.spin_boxes[choice].update({name: spin_box})
+
+        slider = QSlider(Qt.Orientation.Horizontal)
+        slider.setTickPosition(QSlider.TicksBelow)
+        slider.setMaximum(10)
+        slider.setPageStep(1)
+        slider.setTracking(True)
+        cb = partial(self.slider_changed, choice, name)
+        slider.valueChanged.connect(cb)
+        if choice not in self.sliders.keys():
+            self.sliders[choice] = {name: slider}
+        else:
+            self.sliders[choice].update({name: slider})
+
+        grid.addWidget(spin_box, 1)
+        grid.addWidget(slider, 2)
+
+    def slider_changed(self, choice, criterion, value):
+        self.spin_boxes[choice][criterion].setValue(value)
+        #self.matrix_action(index, value)  # Only need to be triggered once
+
+    def spin_box_changed(self, choice, criterion, value):
+        self.sliders[choice][criterion].setValue(value)
+
+    def matrix_action(self, index, value):
+        raise NotImplementedError
 
 
 class Ui_MainWindow(SetupUIMixin, MatrixTabMixin, ValueScoreTabMixin):
