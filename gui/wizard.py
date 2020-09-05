@@ -317,13 +317,9 @@ class ContinuousCriteriaPage(EnableNextOnBackMixin, QWizardPage):
         self.parent_wizard.main_parent.matrix.df.drop(idx, axis='columns', inplace=True)
         self.parent_wizard.main_parent.matrix_widget.removeColumn(index)
 
-        # Delete everything inside that criterion's tab and the tab
-        clear_layout(self.parent_wizard.main_parent
-                     .inner_tab_widget.widget(index).layout())
-        self.parent_wizard.main_parent.inner_tab_widget.removeTab(index)
-
+        # FIXME: deleting item then adding it again doesn't add it in the tab
         # Remove the section in the data tab
-        groupbox = self.parent_wizard.main_parent.data_grid.takeAt(index).widget()
+        groupbox = self.parent_wizard.main_parent.data_grid.takeAt(index + 1).widget()
         clear_layout(groupbox.layout())
         self.parent_wizard.main_parent.data_grid.removeWidget(groupbox)
         groupbox.deleteLater()
