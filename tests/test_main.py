@@ -1,3 +1,4 @@
+from unittest.mock import Mock
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import (
     QMainWindow,
@@ -163,6 +164,7 @@ def test_add_continuous_criteria(qtbot):
     MainWindow = QMainWindow()
     ui = main.Ui_MainWindow()
     ui.setupUi(MainWindow)
+    ui.data_grid = Mock()
     # Notice that QMainWindow is registered as the widget
     qtbot.addWidget(MainWindow)
     MainWindow.show()

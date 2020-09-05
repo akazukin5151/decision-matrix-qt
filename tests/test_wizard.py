@@ -1,3 +1,5 @@
+from unittest.mock import Mock
+
 import pytest
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QMainWindow
@@ -261,6 +263,7 @@ def test_continuous_criteria_wizard_page(qtbot):
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     ui.matrix = Matrix()
+    ui.data_grid = Mock()
     w = wizard.Wizard(ui)
     w.page(wizard.Page.Weights).collection = lambda: ['color', 'taste']
     qtbot.addWidget(w)
@@ -327,6 +330,7 @@ def test_continuous_criteria_weights(qtbot):
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     ui.matrix = Matrix()
+    ui.data_grid = Mock()
     w = wizard.Wizard(ui)
     w.page(wizard.Page.Weights).collection = lambda: ['color', 'taste']
     qtbot.addWidget(w)
@@ -367,6 +371,7 @@ def test_value_score_wizard_page(qtbot):
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     ui.matrix = Matrix()
+    ui.data_grid = Mock()
     w = wizard.Wizard(ui)
     w.page(wizard.Page.Weights).collection = lambda: ['color', 'taste']
     qtbot.addWidget(w)
