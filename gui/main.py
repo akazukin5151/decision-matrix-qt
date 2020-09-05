@@ -300,6 +300,9 @@ class ValueScoreTabMixin:
         if type(self.data_grid.itemAt(0).widget()) == QLabel:
             return
 
+        if not hasattr(self.data_tab_page, 'matrix'):
+            self.data_tab_page.matrix = self.matrix
+
         for choice, groupbox in self.data_tab_groupboxes.items():
             inner_grid = QHBoxLayout()
             self.data_tab_page.initializePage(inner_grid, choice, criterion_name)
@@ -341,13 +344,17 @@ class DataTab:
 
     def slider_changed(self, choice, criterion, value):
         self.spin_boxes[choice][criterion].setValue(value)
-        #self.matrix_action(index, value)  # Only need to be triggered once
+        self.matrix_action(choice, criterion, value)  # Only need to be triggered once
 
     def spin_box_changed(self, choice, criterion, value):
         self.sliders[choice][criterion].setValue(value)
 
-    def matrix_action(self, index, value):
-        raise NotImplementedError
+    def matrix_action(self, choice, _criterion, _value):
+        self.matrix.add_data(choice, {
+            criterion: spin_box.value()
+            for criterion, spin_box in self.spin_boxes[choice].items()
+        })
+        print(self.matrix)
 
 
 class Ui_MainWindow(SetupUIMixin, MatrixTabMixin, ValueScoreTabMixin):
