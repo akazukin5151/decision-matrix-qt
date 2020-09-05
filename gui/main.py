@@ -269,7 +269,7 @@ class ValueScoreTabMixin:
         self.line_edit_cc_tab.setFocus()
 
         # Add to data tab
-        if type(self.data_grid.itemAt(0).widget()) == QLabel:
+        if self.data_grid.count() == 1:
             self.data_grid.takeAt(0).widget().deleteLater()
 
 
