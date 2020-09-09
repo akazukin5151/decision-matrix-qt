@@ -1,25 +1,20 @@
-from functools import partial
-
 import numpy as np
 import pandas as pd
 from matrix import Matrix
-from PySide2.QtCore import QCoreApplication, Qt
+from PySide2.QtCore import QCoreApplication
 from PySide2.QtWidgets import (
     QWidget,
-    QGridLayout,
     QTableWidgetItem,
     QLabel,
     QMessageBox,
     QCheckBox,
     QGroupBox,
     QVBoxLayout,
-    QSpinBox,
-    QSlider,
     QHBoxLayout,
 )
 
 from gui.setup import SetupUIMixin
-from gui.wizard import AbstractDataTab, AbstractValueScoreLayout
+from gui.core import AbstractDataTab, AbstractValueScoreLayout
 
 
 _translate = QCoreApplication.translate
