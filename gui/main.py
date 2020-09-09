@@ -351,14 +351,14 @@ class DataTab:
         self.sliders[choice][criterion].setValue(value)
 
     def matrix_action(self, choice, _criterion, _value):
-        self.matrix.add_data(choice, {
+        self.parent.matrix.add_data(choice, {
             criterion: spin_box.value()
             for criterion, spin_box in self.spin_boxes[choice].items()
         })
-        #print(self.matrix)
-        row = self.matrix.df.index.get_loc(choice)
-        column = self.matrix.df.columns.get_loc(_criterion)
-        item = QTableWidgetItem(str(self.matrix.df.loc[choice, _criterion]))
+        #print(self.parent.matrix)
+        row = self.parent.matrix.df.index.get_loc(choice)
+        column = self.parent.matrix.df.columns.get_loc(_criterion)
+        item = QTableWidgetItem(str(self.parent.matrix.df.loc[choice, _criterion]))
         self.parent.matrix_widget.setItem(row, column, item)
         self.parent.max_total_changed(column)
 
