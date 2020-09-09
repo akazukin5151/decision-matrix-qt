@@ -41,6 +41,7 @@ class Page(IntEnum):
     Continuous = auto()
     ContinuousWeights = auto()
     ValueScores = auto()
+    Data = auto()
     Ratings = auto()
     Conclusion = auto()
 
@@ -74,6 +75,7 @@ class Wizard(QWizard):
         self.setPage(Page.Continuous, ContinuousCriteriaPage(self))
         self.setPage(Page.ContinuousWeights, ContinuousCriteriaWeightsPage(self))
         self.setPage(Page.ValueScores, ValueScorePage(self))
+        self.setPage(Page.Data, DataPage(self))
         self.setPage(Page.Ratings, RatingPage(self))
         self.setPage(Page.Conclusion, ConclusionPage(self))
 
@@ -591,10 +593,7 @@ class AbstractValueScoreLayout:
             self.matrix.value_score_df.loc[index, criterion] = value
             self.matrix.value_score_df.loc[index, criterion + '_score'] = score
 
-        # TODO: update calculated percentages from dataframe to table in tab 1
-        # Need the actual data first, not the value-score pairs
         self.matrix._calculate_percentage()
-        print(self.matrix)
 
 
     def add_row(self, criterion, deleteable=True):
@@ -699,7 +698,81 @@ class ValueScorePage(EnableNextOnBackMixin, AbstractValueScoreLayout, QWizardPag
             and self.parent_wizard.main_parent.matrix.continuous_criteria
         ):
             return Page.Conclusion
-        return Page.Ratings
+        #return Page.Ratings
+        return super().nextId()
+
+
+class AbstractDataTab:
+    def __init__(self):
+        self.sliders = {}
+        self.spin_boxes = {}
+        self.matrix: 'Matrix'  # Required
+
+    def add_row(self, grid, choice, name):
+        grid.addWidget(QLabel(str(name)), 0)
+
+        spin_box = QSpinBox()
+        spin_box.setRange(0, 10)
+        cb = partial(self.spin_box_changed, choice, name)
+        spin_box.valueChanged.connect(cb)
+        if choice not in self.spin_boxes.keys():
+            self.spin_boxes[choice] = {name: spin_box}
+        else:
+            self.spin_boxes[choice].update({name: spin_box})
+
+        slider = QSlider(Qt.Orientation.Horizontal)
+        slider.setTickPosition(QSlider.TicksBelow)
+        slider.setMaximum(10)
+        slider.setPageStep(1)
+        slider.setTracking(True)
+        cb = partial(self.slider_changed, choice, name)
+        slider.valueChanged.connect(cb)
+        if choice not in self.sliders.keys():
+            self.sliders[choice] = {name: slider}
+        else:
+            self.sliders[choice].update({name: slider})
+
+        grid.addWidget(spin_box, 1)
+        grid.addWidget(slider, 2)
+
+    def slider_changed(self, choice, criterion, value):
+        self.spin_boxes[choice][criterion].setValue(value)
+        self.matrix_action(choice, criterion, value)  # Only need to be triggered once
+
+    def spin_box_changed(self, choice, criterion, value):
+        self.sliders[choice][criterion].setValue(value)
+
+    def matrix_action(self, choice, _criterion, _value):
+        self.matrix.add_data(choice, {
+            criterion: spin_box.value()
+            for criterion, spin_box in self.spin_boxes[choice].items()
+        })
+
+
+class DataPage(EnableNextOnBackMixin, AbstractDataTab, QWizardPage):
+    def __init__(self, parent):
+        QWizardPage.__init__(self, parent)
+        AbstractDataTab.__init__(self)
+        self.parent_wizard = weakref.proxy(parent)
+        self.grid = QVBoxLayout(self)
+        self.setTitle('Data')
+        self.matrix = self.parent_wizard.main_parent.matrix
+
+    def initializePage(self):
+        for choice in self.matrix.df.index[1:]:
+            # Every choice gets a groupbox
+            groupbox = QGroupBox(choice)
+            QVBoxLayout(groupbox)
+            for criterion in self.matrix.continuous_criteria:
+                inner_grid = QHBoxLayout()
+                self.add_row(inner_grid, choice, criterion)
+                groupbox.layout().addLayout(inner_grid)
+                self.grid.addWidget(groupbox)
+
+    def matrix_action(self, choice, _criterion, _value):
+        super().matrix_action(choice, _criterion, _value)
+        # TODO: sync rating and percentage to table
+        # sync value to spin boxes and sliders in data tab
 
 
 class ConclusionPage(QWizardPage):

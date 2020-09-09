@@ -2,6 +2,7 @@ from functools import partial
 
 import numpy as np
 import pandas as pd
+from matrix import Matrix
 from PySide2.QtCore import QCoreApplication, Qt
 from PySide2.QtWidgets import (
     QWidget,
@@ -18,7 +19,7 @@ from PySide2.QtWidgets import (
 )
 
 from gui.setup import SetupUIMixin
-from gui.wizard import AbstractValueScoreLayout
+from gui.wizard import AbstractDataTab, AbstractValueScoreLayout
 
 
 _translate = QCoreApplication.translate
@@ -46,6 +47,20 @@ class ValueScoreTab(AbstractValueScoreLayout):
         ]
         super().initializePage(criteria_filtered)
 
+
+class DataTab(AbstractDataTab):
+    def __init__(self, parent):
+        super().__init__()
+        self.parent = parent
+        self.matrix = parent.matrix
+
+    def matrix_action(self, choice, _criterion, _value):
+        super().matrix_action(choice, _criterion, _value)
+        row = self.matrix.df.index.get_loc(choice)
+        column = self.matrix.df.columns.get_loc(_criterion)
+        item = QTableWidgetItem(str(self.matrix.df.loc[choice, _criterion]))
+        self.parent.matrix_widget.setItem(row, column, item)
+        self.parent.max_total_changed(column)
 
 
 class MatrixTabMixin:
@@ -107,7 +122,7 @@ class MatrixTabMixin:
         # Copied
         for criterion_name in self.matrix.continuous_criteria:
             inner_grid = QHBoxLayout()
-            self.data_tab_page.initializePage(inner_grid, new_row_name, criterion_name)
+            self.data_tab_page.add_row(inner_grid, new_row_name, criterion_name)
             groupbox.layout().addLayout(inner_grid)
             self.data_grid.addWidget(groupbox)
 
@@ -264,6 +279,7 @@ class MatrixTabMixin:
 class ValueScoreTabMixin:
     def __init__(self):
         # This is the only init function in any mixin class
+        self.matrix = Matrix()
         self.cc_tab_page = None
         # Data tab stuff
         self.data_tab_page = DataTab(self)
@@ -300,67 +316,11 @@ class ValueScoreTabMixin:
         if type(self.data_grid.itemAt(0).widget()) == QLabel:
             return
 
-        if not hasattr(self.data_tab_page, 'matrix'):
-            self.data_tab_page.matrix = self.matrix
-
         for choice, groupbox in self.data_tab_groupboxes.items():
             inner_grid = QHBoxLayout()
-            self.data_tab_page.initializePage(inner_grid, choice, criterion_name)
+            self.data_tab_page.add_row(inner_grid, choice, criterion_name)
             groupbox.layout().addLayout(inner_grid)
             self.data_grid.addWidget(groupbox)
-
-
-class DataTab:
-    def __init__(self, parent):
-        self.sliders = {}
-        self.spin_boxes = {}
-        self.parent = parent
-
-    def initializePage(self, grid, choice, name):
-        grid.addWidget(QLabel(str(name)), 0)
-
-        spin_box = QSpinBox()
-        spin_box.setRange(0, 10)
-        cb = partial(self.spin_box_changed, choice, name)
-        spin_box.valueChanged.connect(cb)
-        if choice not in self.spin_boxes.keys():
-            self.spin_boxes[choice] = {name: spin_box}
-        else:
-            self.spin_boxes[choice].update({name: spin_box})
-
-        slider = QSlider(Qt.Orientation.Horizontal)
-        slider.setTickPosition(QSlider.TicksBelow)
-        slider.setMaximum(10)
-        slider.setPageStep(1)
-        slider.setTracking(True)
-        cb = partial(self.slider_changed, choice, name)
-        slider.valueChanged.connect(cb)
-        if choice not in self.sliders.keys():
-            self.sliders[choice] = {name: slider}
-        else:
-            self.sliders[choice].update({name: slider})
-
-        grid.addWidget(spin_box, 1)
-        grid.addWidget(slider, 2)
-
-    def slider_changed(self, choice, criterion, value):
-        self.spin_boxes[choice][criterion].setValue(value)
-        self.matrix_action(choice, criterion, value)  # Only need to be triggered once
-
-    def spin_box_changed(self, choice, criterion, value):
-        self.sliders[choice][criterion].setValue(value)
-
-    def matrix_action(self, choice, _criterion, _value):
-        self.parent.matrix.add_data(choice, {
-            criterion: spin_box.value()
-            for criterion, spin_box in self.spin_boxes[choice].items()
-        })
-        #print(self.parent.matrix)
-        row = self.parent.matrix.df.index.get_loc(choice)
-        column = self.parent.matrix.df.columns.get_loc(_criterion)
-        item = QTableWidgetItem(str(self.parent.matrix.df.loc[choice, _criterion]))
-        self.parent.matrix_widget.setItem(row, column, item)
-        self.parent.max_total_changed(column)
 
 
 class Ui_MainWindow(SetupUIMixin, MatrixTabMixin, ValueScoreTabMixin):

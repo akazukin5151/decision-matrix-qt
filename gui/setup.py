@@ -1,4 +1,3 @@
-from matrix import Matrix
 from PySide2.QtCore import Qt, QMetaObject, QCoreApplication
 from PySide2.QtGui import QKeySequence
 from PySide2.QtWidgets import (
@@ -55,7 +54,6 @@ class SetupUIMixin(WizardMixin):
         self.main_window = MainWindow
         MainWindow.resize(771, 514)
         MainWindow.setWindowTitle(_translate("MainWindow", "Decision Matrix"))
-        self.matrix = Matrix()
 
         self.centralwidget = QWidget(MainWindow)
         MainWindow.setCentralWidget(self.centralwidget)
