@@ -569,10 +569,9 @@ class DataPage(EnableNextOnBackMixin, AbstractDataTab, QWizardPage):
                 groupbox.layout().addLayout(inner_grid)
                 self.grid.addWidget(groupbox)
 
-    def matrix_action(self, choice, _criterion, _value):
-        super().matrix_action(choice, _criterion, _value)
+    def sync(self, choice, criterion, value):
         (self.parent_wizard.main_parent.data_tab_page
-                .spin_boxes[choice][_criterion].setValue(_value))
+                .spin_boxes[choice][criterion].setValue(value))
 
 
 class ConclusionPage(QWizardPage):

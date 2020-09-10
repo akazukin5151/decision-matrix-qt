@@ -209,10 +209,14 @@ class AbstractDataTab:
     def spin_box_changed(self, choice, criterion, value):
         self.sliders[choice][criterion].setValue(value)
 
-    def matrix_action(self, choice, _criterion, _value):
+    def matrix_action(self, choice, criterion_, value_):
         self.matrix.add_data(choice, {
             criterion: spin_box.value()
             for criterion, spin_box in self.spin_boxes[choice].items()
         })
+        self.sync(choice, criterion_, value_)
+
+    def sync(self, choice, criterion, value):
+        raise NotImplementedError
 
 

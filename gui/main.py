@@ -49,11 +49,10 @@ class DataTab(AbstractDataTab):
         self.parent = parent
         self.matrix = parent.matrix
 
-    def matrix_action(self, choice, _criterion, _value):
-        super().matrix_action(choice, _criterion, _value)
+    def sync(self, choice, criterion, value):
         row = self.matrix.df.index.get_loc(choice)
-        column = self.matrix.df.columns.get_loc(_criterion)
-        item = QTableWidgetItem(str(self.matrix.df.loc[choice, _criterion]))
+        column = self.matrix.df.columns.get_loc(criterion)
+        item = QTableWidgetItem(str(value))
         self.parent.matrix_widget.setItem(row, column, item)
         self.parent.max_total_changed(column)
 
