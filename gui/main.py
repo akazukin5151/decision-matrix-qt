@@ -271,16 +271,6 @@ class MatrixTabMixin:
 
 
 class ValueScoreTabMixin:
-    def __init__(self):
-        # This is the only init function in any mixin class
-        self.matrix = Matrix()
-        self.cc_tab_page = None
-        # Data tab stuff
-        self.data_tab_page = DataTab(self)
-        self.data_tab_groupboxes = {}  # For add_row in the other mixin
-        self.sliders = []
-        self.spin_boxes = []
-
     # Tab 2
     ## Callbacks
     def add_continuous_criteria(self):
@@ -318,5 +308,9 @@ class ValueScoreTabMixin:
 
 
 class Ui_MainWindow(SetupUIMixin, MatrixTabMixin, ValueScoreTabMixin):
-    pass
-
+    def __init__(self):
+        # Make sure that mixins do not have an init method
+        self.matrix = Matrix()
+        self.cc_tab_page = None
+        self.data_tab_page = DataTab(self)
+        self.data_tab_groupboxes = {}
