@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from matrix import Matrix
-from PySide2.QtCore import QCoreApplication
+from PySide2.QtCore import QSettings, QCoreApplication
 from PySide2.QtWidgets import (
     QWidget,
     QTableWidgetItem,
@@ -256,18 +256,24 @@ class MatrixTabMixin:
             if bottom_fn(the_range) == top_fn(the_range):
                 message = f'Are you sure you want to remove this {name}?'
 
+        if self.settings.value('confirm_delete') == 'false':  # bool stored as str
+            return selected_ranges
+
         msgbox = QMessageBox()
         msgbox.setIcon(QMessageBox.Question)
         msgbox.setText(message)
         msgbox.setInformativeText('This action cannot be undone (for now)!')
         msgbox.setStandardButtons(QMessageBox.Cancel | QMessageBox.Yes)
         msgbox.setDefaultButton(QMessageBox.Yes)
-        cb = QCheckBox('Do not show this again')
-        msgbox.setCheckBox(cb)
-        # TODO: actually make this checkbox do something
+        checkbox = QCheckBox('Do not show this again')
+        checkbox.clicked.connect(self.save_checkbox_setting)
+        msgbox.setCheckBox(checkbox)
         if msgbox.exec() == QMessageBox.Cancel:
             return
         return selected_ranges
+
+    def save_checkbox_setting(self, checked: bool):
+        self.settings.setValue('confirm_delete', not checked)
 
 
 class ValueScoreTabMixin:
@@ -311,6 +317,10 @@ class Ui_MainWindow(SetupUIMixin, MatrixTabMixin, ValueScoreTabMixin):
     def __init__(self):
         # Make sure that mixins do not have an init method
         self.matrix = Matrix()
+        self.settings = QSettings('twenty5151', 'decision_matrix_qt')
         self.cc_tab_page = None
         self.data_tab_page = DataTab(self)
         self.data_tab_groupboxes = {}
+
+        if not self.settings.contains('confirm_delete'):
+            self.settings.setValue('confirm_delete', True)
