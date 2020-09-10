@@ -17,7 +17,7 @@ from PySide2.QtWidgets import (
     QHBoxLayout,
 )
 
-from gui.core import WizardMixin
+from gui.wizard import WizardMixin
 
 
 _translate = QCoreApplication.translate

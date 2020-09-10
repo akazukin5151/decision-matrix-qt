@@ -15,18 +15,6 @@ from PySide2.QtWidgets import (
 )
 
 
-class WizardMixin:
-    def init_wizard(self):
-        self.wizard = Wizard(self)
-        self.wizard.rejected.connect(self.rejected)
-        self.wizard.show()
-
-    def rejected(self):
-        #self.matrix = Matrix()
-        #print(self.matrix)
-        pass
-
-
 class AbstractValueScoreLayout:
     def __init__(self, grid):
         # Subclasses must provide these attributes
