@@ -571,8 +571,8 @@ class DataPage(EnableNextOnBackMixin, AbstractDataTab, QWizardPage):
 
     def matrix_action(self, choice, _criterion, _value):
         super().matrix_action(choice, _criterion, _value)
-        # TODO: sync rating and percentage to table
-        # sync value to spin boxes and sliders in data tab
+        (self.parent_wizard.main_parent.data_tab_page
+                .spin_boxes[choice][_criterion].setValue(_value))
 
 
 class ConclusionPage(QWizardPage):
