@@ -46,9 +46,35 @@ class IO:
         parent.matrix.value_score_df = pd.DataFrame.from_dict(data['value_score_df'])
         parent.matrix.data_df = pd.DataFrame.from_dict(data['data_df'])
 
-        # TODO: populate values in table
-        print(parent.matrix)
-        print(parent.matrix.value_score_df)
-        print(parent.matrix.data_df)
+        parent.matrix.continuous_criteria = parent.matrix.df.columns[:-1].intersection(
+            parent.matrix.data_df.columns
+        )
+
+        # Order is significant
+        # TODO: load values
+        load_continuous_criteria(parent)
+        load_criteria(parent)
+        load_choices(parent)
+
+
+def load_choices(parent):
+    for choice in parent.matrix.df.index[1:]:
+        parent.lineEdit.setText(choice)
+        parent.pushButton.click()
+
+
+def load_criteria(parent):
+    parent.combo_box.setCurrentIndex(1)
+    for criterion in parent.matrix.criteria:
+        parent.lineEdit.setText(criterion)
+        parent.pushButton.click()
+    parent.combo_box.setCurrentIndex(0)
+
+
+def load_continuous_criteria(parent):
+    for criterion in parent.matrix.continuous_criteria:
+        parent.line_edit_cc_tab.setText(criterion)
+        parent.criterion_button.click()
+
 
 io = IO()
