@@ -18,6 +18,7 @@ from PySide2.QtWidgets import (
 )
 
 from gui.wizard import WizardMixin
+from gui.io import io
 
 
 _translate = QCoreApplication.translate
@@ -89,15 +90,15 @@ class SetupUIMixin(WizardMixin):
             '&File': {
                 '&Open': {
                     'shortcut': QKeySequence.Open,
-                    'signal': lambda: print('todo'),
+                    'signal': lambda: io.open_(self),
                 },
                 '&Save': {
                     'shortcut': QKeySequence.Save,
-                    'signal': lambda: print('todo'),
+                    'signal': lambda: io.save(self.matrix),
                 },
                 'Save &as': {
                     'shortcut': QKeySequence.SaveAs,
-                    'signal': lambda: print('todo'),
+                    'signal': lambda: io.save_as(self.matrix),
                 },
                 '&Quit': {
                     'shortcut': QKeySequence.Quit,
