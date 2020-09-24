@@ -49,5 +49,6 @@ class IO:
         # TODO: populate values in table
         print(parent.matrix)
         print(parent.matrix.value_score_df)
+        print(parent.matrix.data_df)
 
 io = IO()
