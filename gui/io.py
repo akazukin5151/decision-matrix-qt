@@ -27,7 +27,7 @@ class IO:
         data = {
             'matrix': matrix.df.to_dict(),
             'value_score_df': matrix.value_score_df.to_dict(),
-            'data': 'TODO'
+            'data_df': matrix.data_df.to_dict(),
         }
         with open(self.path, 'w') as f:
             f.write(json.dumps(data))
@@ -44,6 +44,7 @@ class IO:
 
         parent.matrix.df = pd.DataFrame.from_dict(data['matrix'])
         parent.matrix.value_score_df = pd.DataFrame.from_dict(data['value_score_df'])
+        parent.matrix.data_df = pd.DataFrame.from_dict(data['data_df'])
 
         # TODO: populate values in table
         print(parent.matrix)
