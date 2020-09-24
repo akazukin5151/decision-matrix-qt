@@ -30,7 +30,7 @@ class IO:
             'data_df': matrix.data_df.to_dict(),
         }
         with open(self.path, 'w') as f:
-            f.write(json.dumps(data))
+            f.write(json.dumps(data, indent=2))
 
     def open_(self, parent):
         path, _ = QFileDialog.getOpenFileName(
