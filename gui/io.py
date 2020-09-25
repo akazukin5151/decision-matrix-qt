@@ -62,6 +62,7 @@ class IO:
         load_choices(parent)
         insert_weights(parent)
         insert_ratings(parent)
+        insert_criterion_value_to_scores(parent)
 
 
 def load_choices(parent):
@@ -96,6 +97,16 @@ def insert_ratings(parent):
         for col, (_, rating) in enumerate(series.items()):
             parent.matrix_widget.setItem(row, col, QTableWidgetItem(str(rating)))
             parent.rating_changed(row, col)  # Update percentages
+
+
+def insert_criterion_value_to_scores(parent):
+    for row, series in parent.matrix.value_score_df.iterrows():
+        for col_name, value in series.items():
+            if col_name.endswith('_score'):
+                criterion = col_name.split('_score')[0]
+                parent.cc_tab_page.score_spin_boxes[criterion][int(row)].setValue(value)
+            else:
+                parent.cc_tab_page.value_spin_boxes[col_name][int(row)].setValue(value)
 
 
 io = IO()
