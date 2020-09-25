@@ -57,12 +57,12 @@ class IO:
 
         parent.matrix.continuous_criteria = parent.matrix.data_df.columns
 
-        # TODO: load values
         load_criteria(parent)
         load_choices(parent)
         insert_weights(parent)
         insert_ratings(parent)
         insert_criterion_value_to_scores(parent)
+        insert_data(parent)
 
 
 def load_choices(parent):
@@ -94,7 +94,9 @@ def insert_weights(parent):
 def insert_ratings(parent):
     for idx, (choice, series) in enumerate(parent.matrix.df.iloc[1:, :-1].iterrows()):
         row = idx + 1  # First row is weights
-        for col, (_, rating) in enumerate(series.items()):
+        for col, (criterion, rating) in enumerate(series.items()):
+            if criterion in parent.matrix.continuous_criteria:
+                continue
             parent.matrix_widget.setItem(row, col, QTableWidgetItem(str(rating)))
             parent.rating_changed(row, col)  # Update percentages
 
@@ -107,6 +109,12 @@ def insert_criterion_value_to_scores(parent):
                 parent.cc_tab_page.score_spin_boxes[criterion][int(row)].setValue(value)
             else:
                 parent.cc_tab_page.value_spin_boxes[col_name][int(row)].setValue(value)
+
+
+def insert_data(parent):
+    for choice, series in parent.matrix.data_df.iterrows():
+        for criterion, value in series.items():
+            parent.data_tab_page.sliders[choice][criterion].setValue(value)
 
 
 io = IO()
