@@ -2,7 +2,10 @@ from pathlib import Path
 import json
 
 import pandas as pd
-from PySide2.QtWidgets import QFileDialog
+from PySide2.QtWidgets import (
+    QFileDialog,
+    QTableWidgetItem
+)
 
 
 class IO:
@@ -57,6 +60,8 @@ class IO:
         # TODO: load values
         load_criteria(parent)
         load_choices(parent)
+        insert_weights(parent)
+        insert_ratings(parent)
 
 
 def load_choices(parent):
@@ -78,6 +83,19 @@ def load_continuous_criteria(parent, cc):
     for criterion in cc:
         parent.line_edit_cc_tab.setText(criterion)
         parent.criterion_button.click()
+
+
+def insert_weights(parent):
+    for idx, weight in enumerate(parent.matrix.df.loc['Weight'][:-1]):
+        parent.matrix_widget.setItem(0, idx, QTableWidgetItem(str(weight)))
+
+
+def insert_ratings(parent):
+    for idx, (choice, series) in enumerate(parent.matrix.df.iloc[1:, :-1].iterrows()):
+        row = idx + 1  # First row is weights
+        for col, (_, rating) in enumerate(series.items()):
+            parent.matrix_widget.setItem(row, col, QTableWidgetItem(str(rating)))
+            parent.rating_changed(row, col)  # Update percentages
 
 
 io = IO()
