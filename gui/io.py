@@ -30,7 +30,7 @@ class IO:
         data = {
             'matrix': matrix.df.to_dict(),
             'value_score_df': matrix.value_score_df.to_dict(),
-            'data_df': matrix.data_df.to_dict(),
+            'data_df': matrix.data_df.to_dict(orient='index'),
         }
         with open(self.path, 'w') as f:
             f.write(json.dumps(data, indent=2))
@@ -48,7 +48,7 @@ class IO:
         # Order is significant
         # Duplicated because this clears the weights
         load_continuous_criteria(
-            parent, pd.DataFrame.from_dict(data['data_df']).columns
+            parent, pd.DataFrame.from_dict(data['data_df'], orient='index').columns
         )
 
         parent.matrix.df = pd.DataFrame.from_dict(data['matrix'])
@@ -57,7 +57,7 @@ class IO:
         # Loading again because load_criteria has nasty side effects
         parent.matrix.df = pd.DataFrame.from_dict(data['matrix'])
         parent.matrix.value_score_df = pd.DataFrame.from_dict(data['value_score_df'])
-        parent.matrix.data_df = pd.DataFrame.from_dict(data['data_df'])
+        parent.matrix.data_df = pd.DataFrame.from_dict(data['data_df'], orient='index')
 
         parent.matrix.continuous_criteria = parent.matrix.data_df.columns
 
