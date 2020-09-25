@@ -61,6 +61,7 @@ def load_choices(parent):
     for choice in parent.matrix.df.index[1:]:
         parent.lineEdit.setText(choice)
         parent.pushButton.click()
+        parent.matrix.df = parent.matrix.df[:-1]
 
 
 def load_criteria(parent):
