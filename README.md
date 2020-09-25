@@ -1,4 +1,4 @@
-# Decision matrix qt
+# Decision matrix qt (WIP)
 
 ![screenshot](screenshot.png)
 
