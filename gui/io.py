@@ -42,15 +42,19 @@ class IO:
         with open(path, 'r') as f:
             data = json.load(f)
 
+        # Order is significant
+        # Duplicated because this clears the weights
+        load_continuous_criteria(
+            parent, pd.DataFrame.from_dict(data['data_df']).columns
+        )
+
         parent.matrix.df = pd.DataFrame.from_dict(data['matrix'])
         parent.matrix.value_score_df = pd.DataFrame.from_dict(data['value_score_df'])
         parent.matrix.data_df = pd.DataFrame.from_dict(data['data_df'])
 
         parent.matrix.continuous_criteria = parent.matrix.data_df.columns
 
-        # Order is significant
         # TODO: load values
-        load_continuous_criteria(parent)
         load_criteria(parent)
         load_choices(parent)
 
@@ -70,8 +74,8 @@ def load_criteria(parent):
     parent.combo_box.setCurrentIndex(0)
 
 
-def load_continuous_criteria(parent):
-    for criterion in parent.matrix.continuous_criteria:
+def load_continuous_criteria(parent, cc):
+    for criterion in cc:
         parent.line_edit_cc_tab.setText(criterion)
         parent.criterion_button.click()
 
