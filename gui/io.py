@@ -92,6 +92,8 @@ def load_continuous_criteria(parent, cc):
 def insert_weights(parent):
     for idx, weight in enumerate(parent.matrix.df.loc['Weight'][:-1]):
         parent.matrix_widget.setItem(0, idx, QTableWidgetItem(str(weight)))
+    # Fixes bug where first column seems to be ignored
+    parent.max_total_changed(0)
 
 
 def insert_ratings(parent):
