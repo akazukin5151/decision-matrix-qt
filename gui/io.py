@@ -52,12 +52,15 @@ class IO:
         )
 
         parent.matrix.df = pd.DataFrame.from_dict(data['matrix'])
+        load_criteria(parent)
+
+        # Loading again because load_criteria has nasty side effects
+        parent.matrix.df = pd.DataFrame.from_dict(data['matrix'])
         parent.matrix.value_score_df = pd.DataFrame.from_dict(data['value_score_df'])
         parent.matrix.data_df = pd.DataFrame.from_dict(data['data_df'])
 
         parent.matrix.continuous_criteria = parent.matrix.data_df.columns
 
-        load_criteria(parent)
         load_choices(parent)
         insert_weights(parent)
         insert_ratings(parent)
