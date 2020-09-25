@@ -46,9 +46,7 @@ class IO:
         parent.matrix.value_score_df = pd.DataFrame.from_dict(data['value_score_df'])
         parent.matrix.data_df = pd.DataFrame.from_dict(data['data_df'])
 
-        parent.matrix.continuous_criteria = parent.matrix.df.columns[:-1].intersection(
-            parent.matrix.data_df.columns
-        )
+        parent.matrix.continuous_criteria = parent.matrix.data_df.columns
 
         # Order is significant
         # TODO: load values
